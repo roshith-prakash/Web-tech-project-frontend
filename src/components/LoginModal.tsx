@@ -164,7 +164,7 @@ const LoginModal = ({
     >
       {/* Title */}
       <h1 className="dark:text-darkmodetext pt-5 font-bold text-xl text-center">
-        Sign in to Grid Manager
+        Sign in to StayFinder
       </h1>
 
       {/* Subtitle */}

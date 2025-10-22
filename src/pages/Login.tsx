@@ -1,15 +1,17 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import {
   ErrorStatement,
   Input,
-  PrimaryButton,
   PasswordInput,
+  PrimaryButton,
 } from "@/components";
 import { auth } from "@/firebase/firebase";
 import {
   signInWithPopup,
   GoogleAuthProvider,
   signInWithEmailAndPassword,
+  signOut,
 } from "firebase/auth";
 import { Link, useNavigate } from "react-router-dom";
 import { isValidEmail, isValidPassword } from "@/functions/regexFunctions";
@@ -28,29 +30,34 @@ const Login = () => {
   const [error, setError] = useState({
     email: 0,
     pw: 0,
+    api: "",
   });
 
   const { dbUser } = useDBUser();
 
-  if (dbUser) {
-    navigate("/");
-  }
+  // Check for existing user and redirect to home if logged in
+  useEffect(() => {
+    if (dbUser) {
+      navigate("/");
+    }
+  }, [dbUser, navigate]);
 
   // Scroll to top of page
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
-  // Set window title.
+  // Set window title
   useEffect(() => {
-    document.title = "Sign in | Grid Manager";
+    document.title = "Sign in | StayFinder";
   }, []);
 
   // Login using email and password
-  const handleLogin = () => {
+  const handleLogin = async () => {
     setError({
       email: 0,
       pw: 0,
+      api: "",
     });
 
     // Check if email has been entered
@@ -81,85 +88,100 @@ const Login = () => {
     // Disable buttons
     setDisabled(true);
 
-    // Sign in using firebase
-    signInWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        // Signed in
-        const user = userCredential.user;
+    try {
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const user = userCredential.user;
 
-        // Check if user exists in DB - if yes, send to home - if no, send to onboarding.
-        axiosInstance
-          .post("/user/get-current-user", { user: user })
-          .then((res) => {
-            if (res?.data?.user) {
-              setDisabled(false);
-              navigate("/");
-            }
-          })
-          .catch((err) => {
-            console.log(err);
-            setDisabled(false);
-            if (err?.response?.data?.data == "User does not exist.") {
-              navigate("/onboarding");
-            }
-          });
-        // ...
-      })
-      .catch((error) => {
-        // const errorCode = error.code;
-        const errorMessage = error.message;
-        console.log(errorMessage);
-        setDisabled(false);
-        // Display invalid credentials toast error
-        if (String(errorMessage).includes("(auth/invalid-credential)")) {
-          toast.error("Invalid Credentials.");
+      // Check if user exists in DB
+      try {
+        const response = await axiosInstance.post("/user/get-current-user", {
+          user,
+        });
+        if (response?.data?.user) {
+          navigate("/"); // User exists, redirect to home
+        } else {
+          // User authenticated in Firebase but not in DB
+          await signOut(auth);
+          toast.error(
+            "You have not signed up yet. Please sign up as a Guest or Host."
+          );
+          setError((prev) => ({
+            ...prev,
+            api: "You have not signed up yet. Please sign up as a Guest or Host.",
+          }));
         }
-        // Display error
-        else {
-          toast.error("Something went wrong.");
-        }
-      });
+      } catch (err: any) {
+        console.log(err);
+        await signOut(auth);
+        toast.error(
+          "You have not signed up yet. Please sign up as a Guest or Host."
+        );
+        setError((prev) => ({
+          ...prev,
+          api: "You have not signed up yet. Please sign up as a Guest or Host.",
+        }));
+      }
+    } catch (error: any) {
+      const errorMessage = error.message;
+      console.log(errorMessage);
+      setError((prev) => ({
+        ...prev,
+        api: String(errorMessage).includes("(auth/invalid-credential)")
+          ? "Invalid Credentials."
+          : "Something went wrong.",
+      }));
+    } finally {
+      setDisabled(false);
+    }
   };
 
-  // Login using google
-  const handleGoogleLogin = () => {
+  // Login using Google
+  const handleGoogleLogin = async () => {
     setDisabled(true);
-    signInWithPopup(auth, provider)
-      .then((result) => {
-        // This gives you a Google Access Token. You can use it to access the Google API.
-        // const credential = GoogleAuthProvider.credentialFromResult(result);
-        // const token = credential.accessToken;
-        // The signed-in user info.
-        const user = result.user;
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
 
-        // Check if user exists in DB - if yes, send to home - if no, send to onboarding.
-        axiosInstance
-          .post("/user/get-current-user", { user: user })
-          .then((res) => {
-            if (res?.data?.user) {
-              setDisabled(false);
-              navigate("/");
-            }
-          })
-          .catch((err) => {
-            console.log(err);
-            setDisabled(false);
-            if (err?.response?.data?.data == "User does not exist.") {
-              navigate("/onboarding");
-            }
-          });
-      })
-      .catch((error) => {
-        // Handle Errors here.
-        setDisabled(false);
-        // const errorCode = error.code;
-        const errorMessage = error.message;
-        // The email of the user's account used.
-        // const email = error.customData.email;
-        // The AuthCredential type that was used.
-        // const credential = GoogleAuthProvider.credentialFromError(error);
-        console.log(errorMessage);
-      });
+      // Check if user exists in DB
+      try {
+        const response = await axiosInstance.post("/user/get-current-user", {
+          user,
+        });
+        if (response?.data?.user) {
+          navigate("/"); // User exists, redirect to home
+        } else {
+          // User authenticated in Firebase but not in DB
+          await signOut(auth);
+          toast.error(
+            "You have not signed up yet. Please sign up as a Guest or Host."
+          );
+          setError((prev) => ({
+            ...prev,
+            api: "You have not signed up yet. Please sign up as a Guest or Host.",
+          }));
+        }
+      } catch (err: any) {
+        console.log(err);
+        await signOut(auth);
+        toast.error(
+          "You have not signed up yet. Please sign up as a Guest or Host."
+        );
+        setError((prev) => ({
+          ...prev,
+          api: "You have not signed up yet. Please sign up as a Guest or Host.",
+        }));
+      }
+    } catch (error: any) {
+      const errorMessage = error.message;
+      console.log(errorMessage);
+      setError((prev) => ({ ...prev, api: "Something went wrong." }));
+    } finally {
+      setDisabled(false);
+    }
   };
 
   return (
@@ -181,7 +203,7 @@ const Login = () => {
           <div className="bg-white dark:border-1 dark:border-white/25 dark:bg-secondarydarkbg max-w-xl dark:bg-darkgrey dark:text-darkmodetext border-darkbg/25 border-1 px-8 lg:max-w-lg mt-5 p-5 md:px-10 shadow-lg rounded-2xl pb-10">
             {/* Title */}
             <h1 className="dark:text-darkmodetext pt-5 font-bold text-2xl text-center">
-              Sign in to Grid Manager
+              Sign in to StayFinder
             </h1>
 
             {/* Subtitle */}
@@ -189,12 +211,12 @@ const Login = () => {
               Welcome back! Please sign in to continue.
             </h2>
 
-            {/* Google Sign up Button */}
+            {/* Google Sign in Button */}
             <div className="flex justify-center">
               <button
                 disabled={disabled}
                 onClick={handleGoogleLogin}
-                className="mt-8 dark:hover:border-white cursor-pointer hover:border-darkbg border-darkbg/25 dark:border-white/25 border-1 flex  gap-x-2 py-2 justify-center items-center px-14 shadow rounded-lg font-medium active:shadow transition-all"
+                className="mt-8 dark:hover:border-white cursor-pointer hover:border-darkbg border-darkbg/25 dark:border-white/25 border-1 flex gap-x-2 py-2 justify-center items-center px-14 shadow rounded-lg font-medium active:shadow transition-all"
               >
                 {disabled ? <p>Please Wait...</p> : <p>Sign in with Google</p>}
                 <FaGoogle className="text-xl translate-y-0.5" />
@@ -220,15 +242,13 @@ const Login = () => {
                   className="focus:border-darkbg dark:focus:border-white transition-all"
                   onChange={(e) => {
                     setEmail(e.target.value);
-
-                    // Reset error if value is correct
                     if (
                       e.target.value != null &&
                       e.target.value != undefined &&
                       e.target.value.length != 0 &&
                       isValidEmail(e.target.value)
                     ) {
-                      setError((prev) => ({ ...prev, email: 0 }));
+                      setError((prev) => ({ ...prev, email: 0, api: "" }));
                     }
                   }}
                   onBlur={() => {
@@ -248,12 +268,10 @@ const Login = () => {
                   }}
                   placeholder={"Enter your email address"}
                 />
-
                 <ErrorStatement
                   isOpen={error.email == 1}
                   text={"Please enter your email."}
                 />
-
                 <ErrorStatement
                   isOpen={error.email == 2}
                   text={"Please enter a valid email address."}
@@ -268,15 +286,13 @@ const Login = () => {
                   className="focus:border-darkbg dark:focus:border-white transition-all"
                   onChange={(e) => {
                     setPassword(e.target.value);
-
-                    // Reset error if value is correct
                     if (
                       e.target.value != null &&
                       e.target.value != undefined &&
                       e.target.value.length != 0 &&
                       isValidPassword(e.target.value)
                     ) {
-                      setError((prev) => ({ ...prev, pw: 0 }));
+                      setError((prev) => ({ ...prev, pw: 0, api: "" }));
                     }
                   }}
                   onBlur={() => {
@@ -296,18 +312,17 @@ const Login = () => {
                   }}
                   placeholder={"Enter your password"}
                 />
-
                 <ErrorStatement
                   isOpen={error.pw == 1}
                   text={"Please enter a password."}
                 />
-
                 <ErrorStatement
                   isOpen={error.pw == 2}
                   text={
                     "Password must be 8 characters long and must contain an uppercase letter, lowercase letter, number and special character."
                   }
                 />
+                <ErrorStatement isOpen={!!error.api} text={error.api} />
               </div>
 
               <Link
@@ -341,7 +356,14 @@ const Login = () => {
                 className="text-blue-600 dark:text-blue-400 font-medium"
                 to="/signup"
               >
-                Sign up
+                Sign up as a Guest
+              </Link>{" "}
+              or{" "}
+              <Link
+                className="text-blue-600 dark:text-blue-400 font-medium"
+                to="/signup-host"
+              >
+                Sign up as a Host
               </Link>
             </div>
           </div>

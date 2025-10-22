@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -15,13 +16,14 @@ import {
   sendEmailVerification,
   signOut,
 } from "firebase/auth";
+import { axiosInstance } from "@/utils/axiosInstance";
 import { isValidEmail, isValidPassword } from "../functions/regexFunctions";
 import { FaGoogle } from "react-icons/fa6";
 import { useDBUser } from "@/context/UserContext";
 
 const provider = new GoogleAuthProvider();
 
-const Signup = () => {
+const SignupHost = () => {
   const navigate = useNavigate();
   const [disabled, setDisabled] = useState(false);
   const [email, setEmail] = useState("");
@@ -39,8 +41,16 @@ const Signup = () => {
   // Check for existing user with conflicting role
   useEffect(() => {
     if (dbUser) {
-      if (dbUser.role === "HOST") {
-        toast.error("You are registered as a Host. Please sign in as a Host.");
+      if (dbUser.role === "GUEST") {
+        toast.error(
+          <div>
+            You are already registered as a Guest. Please{" "}
+            <Link to="/signin" className="underline text-blue-600">
+              sign in as a Guest
+            </Link>
+            .
+          </div>
+        );
         signOut(auth)
           .then(() => {
             navigate("/signin");
@@ -50,7 +60,7 @@ const Signup = () => {
             toast.error("Failed to log out. Please try again.");
           });
       } else {
-        navigate("/");
+        navigate("/"); // Already a HOST
       }
     }
   }, [dbUser, navigate]);
@@ -60,20 +70,44 @@ const Signup = () => {
     document.title = "Sign up | StayFinder";
   }, []);
 
-  const handleGoogleSignup = () => {
+  const handleGoogleSignup = async () => {
     setDisabled(true);
-    signInWithPopup(auth, provider)
-      .then(() => {
-        setDisabled(false);
-        navigate("/onboarding", { state: { role: "GUEST" } }); // Pass role via state
-      })
-      .catch(() => {
-        setDisabled(false);
-        toast.error("Something went wrong!");
-      });
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+
+      // Check if user exists in database
+      try {
+        const response = await axiosInstance.post("/user/get-current-user", {
+          user,
+        });
+        if (response.data.user?.role === "GUEST") {
+          toast.error(
+            <div>
+              You are already registered as a Guest. Please{" "}
+              <Link to="/signin" className="underline text-blue-600">
+                sign in as a Guest
+              </Link>
+              .
+            </div>
+          );
+          await signOut(auth);
+          // navigate("/signin");
+        } else {
+          navigate("/onboarding", { state: { role: "HOST" } });
+        }
+      } catch {
+        // No user exists in database, proceed to onboarding
+        navigate("/onboarding", { state: { role: "HOST" } });
+      }
+    } catch {
+      toast.error("Something went wrong!");
+    } finally {
+      setDisabled(false);
+    }
   };
 
-  const handleEmailSignup = () => {
+  const handleEmailSignup = async () => {
     setError({
       email: 0,
       pw: 0,
@@ -111,28 +145,53 @@ const Signup = () => {
 
     setDisabled(true);
 
-    createUserWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        const user = userCredential.user;
-        sendEmailVerification(user).then(() => {
-          toast("Email Verification Link sent.");
-          setDisabled(false);
-          navigate("/onboarding", { state: { role: "GUEST" } }); // Pass role via state
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const user = userCredential.user;
+
+      // Check if user exists in database
+      try {
+        const response = await axiosInstance.post("/user/get-current-user", {
+          user,
         });
-      })
-      .catch((error) => {
-        setDisabled(false);
-        const errorMessage = error.message;
-        console.log(errorMessage);
-        if (String(errorMessage).includes("(auth/email-already-in-use)")) {
-          setError((prev) => ({
-            ...prev,
-            api: "Email is already registered!",
-          }));
+        if (response.data.user?.role === "GUEST") {
+          toast.error(
+            <div>
+              You are already registered as a Guest. Please{" "}
+              <Link to="/signin" className="underline text-blue-600">
+                sign in as a Guest
+              </Link>
+              .
+            </div>
+          );
+          await signOut(auth);
+          // navigate("/signin");
         } else {
-          setError((prev) => ({ ...prev, api: "Something went wrong!" }));
+          await sendEmailVerification(user);
+          toast("Email Verification Link sent.");
+          navigate("/onboarding", { state: { role: "HOST" } });
         }
-      });
+      } catch {
+        // No user exists in database, proceed to onboarding
+        await sendEmailVerification(user);
+        toast("Email Verification Link sent.");
+        navigate("/onboarding", { state: { role: "HOST" } });
+      }
+    } catch (error: any) {
+      const errorMessage = error.message;
+      console.log(errorMessage);
+      if (String(errorMessage).includes("(auth/email-already-in-use)")) {
+        setError((prev) => ({ ...prev, api: "Email is already registered!" }));
+      } else {
+        setError((prev) => ({ ...prev, api: "Something went wrong!" }));
+      }
+    } finally {
+      setDisabled(false);
+    }
   };
 
   return (
@@ -141,7 +200,7 @@ const Signup = () => {
         <div className="min-h-[95vh] lg:h-full lg:min-h-[88vh] pb-10 bg-cover flex-1 flex justify-center items-center">
           <div className="bg-white dark:border-1 dark:border-white/25 dark:bg-secondarydarkbg max-w-xl dark:bg-darkgrey dark:text-darkmodetext border-darkbg/25 border-1 px-8 lg:max-w-lg mt-5 p-5 md:px-10 shadow-lg rounded-2xl pb-10">
             <h1 className="dark:text-darkmodetext pt-5 font-bold text-2xl text-center">
-              Create your account
+              Become a Stayfinder Host!
             </h1>
             <h2 className="dark:text-darkmodetext mt-1 text-sm text-darkbg/70 text-center">
               Welcome! Please fill in the details to get started.
@@ -329,4 +388,4 @@ const Signup = () => {
   );
 };
 
-export default Signup;
+export default SignupHost;

@@ -16,7 +16,7 @@ const Signout = () => {
 
   // Set window title.
   useEffect(() => {
-    document.title = "Sign out | Grid Manager";
+    document.title = "Sign out | StayFinder";
   }, []);
 
   const handleLogout = async () => {
@@ -48,8 +48,8 @@ const Signout = () => {
 
           {/* Description */}
           <p className="text-slate-600 dark:text-slate-400 mb-8">
-            Are you sure you want to sign out of your Grid Manager account?
-            You'll need to sign in again to access your teams and leagues.
+            Are you sure you want to sign out of your StayFinder account? You'll
+            need to sign in again to access your teams and leagues.
           </p>
 
           {/* Image */}

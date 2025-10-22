@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { useEffect, useState, ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 const AlertModal = ({
   isOpen,
@@ -47,7 +47,7 @@ const AlertModal = ({
         className={cn(
           `dark:bg-secondarydarkbg scroller ${
             isClosing ? "animate-fadeOut" : "animate-fadeIn"
-          } relative max-h-[90%] w-auto max-w-[95%] min-w-xs overflow-y-auto rounded-xl bg-white p-6 shadow-xl md:min-w-sm dark:border-3 dark:border-white/25 ${className}`,
+          } relative max-h-[90%] w-auto max-w-[95%] min-w-xs overflow-y-auto rounded-xl bg-white p-6 shadow-xl md:min-w-sm dark:border-3 dark:border-white/25 ${className}`
         )}
       >
         {children}

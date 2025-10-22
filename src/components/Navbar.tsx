@@ -103,11 +103,11 @@ const Navbar = () => {
       <nav
         className={`dark:bg-darkbg relative z-2 flex items-center justify-between bg-white px-10 py-3 font-f1 dark:text-white`}
       >
-        {/* Grid Manager */}
+        {/* StayFinder */}
         <Link to="/" aria-label="Home" className="flex gap-x-2 items-center">
           {/* <img
             src={isDarkMode ? logoDark : logo}
-            alt="Grid Manager"
+            alt="StayFinder"
             className="h-8 cursor-pointer"
           /> */}
           <span className="hidden md:block font-semibold text-2xl">
@@ -438,7 +438,7 @@ const Navbar = () => {
             >
               {/* <img
                 src={isDarkMode ? logoDark : logo}
-                alt="Grid Manager"
+                alt="StayFinder"
                 className="h-8 cursor-pointer"
               /> */}
               <span className="font-semibold text-2xl">StayFinder</span>

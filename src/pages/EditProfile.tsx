@@ -4,8 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { IoCloudUploadOutline } from "react-icons/io5";
 import { axiosInstance } from "@/utils/axiosInstance";
 import toast from "react-hot-toast";
-import { isValidUsername } from "@/functions/regexFunctions";
-import { ContextValue, useDarkMode } from "@/context/DarkModeContext";
+import { type ContextValue, useDarkMode } from "@/context/DarkModeContext";
 import { useNavigate } from "react-router-dom";
 import { getAuth, sendPasswordResetEmail } from "firebase/auth";
 
@@ -19,14 +18,11 @@ const EditProfile = () => {
   const [name, setName] = useState("");
   // Profile image of user
   const [image, setImage] = useState();
-  // Username to be stored in DB
-  const [username, setUsername] = useState("");
   // To disable button
   const [disabled, setDisabled] = useState(false);
   // Error
   const [error, setError] = useState({
     name: 0,
-    username: 0,
   });
   const navigate = useNavigate();
 
@@ -37,7 +33,7 @@ const EditProfile = () => {
 
   // Set window title.
   useEffect(() => {
-    document.title = `Edit Profile | Grid Manager`;
+    document.title = `Edit Profile | StayFinder`;
   }, []);
 
   // To set default values.
@@ -45,7 +41,6 @@ const EditProfile = () => {
     if (dbUser) {
       setName(dbUser?.name);
       setImage(dbUser?.photoURL);
-      setUsername(dbUser?.username);
     }
   }, [dbUser]);
 
@@ -64,7 +59,6 @@ const EditProfile = () => {
     // Reset Errors
     setError({
       name: 0,
-      username: 0,
     });
 
     // Validate Data entered by user
@@ -74,122 +68,46 @@ const EditProfile = () => {
     } else if (name.length > 30) {
       setError((prev) => ({ ...prev, name: 2 }));
       return;
-    } else if (
-      username == null ||
-      username == undefined ||
-      username.length <= 0
-    ) {
-      setError((prev) => ({ ...prev, username: 1 }));
-      return;
-    } else if (username.length > 20) {
-      setError((prev) => ({ ...prev, username: 3 }));
-      return;
-    } else if (!isValidUsername(username)) {
-      setError((prev) => ({ ...prev, username: 4 }));
-      return;
     }
 
     // Disable Button
     setDisabled(true);
 
-    // If username is changed, check if the username is available or taken
-    if (username?.toLowerCase() != dbUser?.username) {
-      // Check if username is already in use.
-      axiosInstance
-        .post("/user/check-username", { username: username?.toLowerCase() })
-        .then((res) => {
-          // If username already exists - show an error
-          if (res.data?.exists) {
-            setDisabled(false);
-            setError((prev) => ({ ...prev, username: 2 }));
-            return;
-          }
-          // If username is available
-          else {
-            // Create formdata instance
-            const formData = new FormData();
+    // Create formdata instance
+    const formData = new FormData();
 
-            // If image is added - add a file
-            if (image && typeof image != "string") {
-              formData.append("file", image);
-            }
-
-            // Add details in the user object
-            const obj = {
-              username: username?.toLowerCase(),
-              name: name,
-              image: typeof image == "string" ? image : null,
-            };
-
-            // Append the new user object in formdata
-            formData.append("updatedUser", JSON.stringify(obj));
-            formData.append("userId", dbUser?.id);
-
-            // Add user in DB
-            axiosInstance
-              .post("/user/update-user", formData, {
-                headers: { "Content-Type": "multipart/form-data" },
-              })
-              .then(() => {
-                setDisabled(false);
-                fetchUser();
-                navigate("/profile");
-                toast.success("Profile Updated!");
-              })
-              .catch(() => {
-                // Display error
-                toast.error("Something went wrong!");
-                // Enable button
-                setDisabled(false);
-              });
-          }
-        })
-        .catch((err) => {
-          setDisabled(false);
-          toast.error("Something went wrong.");
-          console.log(err);
-          return;
-        });
+    // If image is added - add a file
+    if (image && typeof image != "string") {
+      formData.append("file", image);
     }
-    // If username was not changed
-    else {
-      // Create formdata instance
-      const formData = new FormData();
 
-      // If image is added - add a file
-      if (image && typeof image != "string") {
-        formData.append("file", image);
-      }
+    // Add details in the user object
+    const obj = {
+      name: name,
+      image: typeof image == "string" ? image : null,
+    };
 
-      // Add details in the user object
-      const obj = {
-        username: username,
-        name: name,
-        image: typeof image == "string" ? image : null,
-      };
+    // Append the new user object in formdata
+    formData.append("updatedUser", JSON.stringify(obj));
+    formData.append("userId", dbUser?.id);
 
-      // Append the new user object in formdata
-      formData.append("updatedUser", JSON.stringify(obj));
-      formData.append("userId", dbUser?.id);
-
-      // Add user in DB
-      axiosInstance
-        .post("/user/update-user", formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        })
-        .then(() => {
-          setDisabled(false);
-          fetchUser();
-          navigate("/profile");
-          toast.success("Profile Updated!");
-        })
-        .catch(() => {
-          // Display error
-          toast.error("Something went wrong!");
-          // Enable button
-          setDisabled(false);
-        });
-    }
+    // Add user in DB
+    axiosInstance
+      .post("/user/update-user", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+      .then(() => {
+        setDisabled(false);
+        fetchUser();
+        navigate("/profile");
+        toast.success("Profile Updated!");
+      })
+      .catch(() => {
+        // Display error
+        toast.error("Something went wrong!");
+        // Enable button
+        setDisabled(false);
+      });
   };
 
   const handlePasswordReset = async () => {
@@ -259,7 +177,7 @@ const EditProfile = () => {
             </button>
           </div>
 
-          {/* Name & Username */}
+          {/* Name */}
           <div className="mt-14 flex flex-col gap-y-8 ">
             {/* Name Input field */}
             <div className="lg:flex-1 px-2">
@@ -301,68 +219,6 @@ const EditProfile = () => {
               <ErrorStatement
                 isOpen={error.name == 2}
                 text={"Name cannot exceed 30 characters."}
-              />
-            </div>
-
-            {/* Username Input field */}
-            <div className="lg:flex-1 px-2">
-              <p className="font-medium">Username</p>
-              <Input
-                className="focus:border-darkbg dark:focus:border-white transition-all"
-                value={username}
-                onChange={(e) => {
-                  setUsername(e.target.value);
-
-                  if (
-                    e.target.value != null &&
-                    e.target.value != undefined &&
-                    e.target.value.length > 0 &&
-                    username.length < 20 &&
-                    isValidUsername(username)
-                  ) {
-                    setError((prev) => ({ ...prev, username: 0 }));
-                    return;
-                  }
-                }}
-                onBlur={() => {
-                  if (
-                    username == null ||
-                    username == undefined ||
-                    username.length <= 0
-                  ) {
-                    setError((prev) => ({ ...prev, username: 1 }));
-                    return;
-                  } else if (username.length > 20) {
-                    setError((prev) => ({ ...prev, username: 3 }));
-                    return;
-                  } else if (!isValidUsername(username)) {
-                    setError((prev) => ({ ...prev, username: 4 }));
-                    return;
-                  } else {
-                    setError((prev) => ({ ...prev, username: 0 }));
-                  }
-                }}
-                placeholder={"Enter a username"}
-              />
-
-              <ErrorStatement
-                isOpen={error.username == 1}
-                text={"Please enter a username."}
-              />
-
-              <ErrorStatement
-                isOpen={error.username == 2}
-                text={"Username already exists."}
-              />
-
-              <ErrorStatement
-                isOpen={error.username == 3}
-                text={"Username cannot exceed 20 characters."}
-              />
-
-              <ErrorStatement
-                isOpen={error.username == 4}
-                text={"Username can contain alphabets, numbers and underscore."}
               />
             </div>
           </div>

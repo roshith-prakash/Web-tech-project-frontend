@@ -3,7 +3,7 @@ import {
   useState,
   useEffect,
   createContext,
-  ReactNode,
+  type ReactNode,
 } from "react";
 import { useAuth } from "./AuthContext";
 import { axiosInstance } from "../utils/axiosInstance";
@@ -39,6 +39,8 @@ export function useDBUser() {
 export function UserProvider({ children }: { children: ReactNode }) {
   const [dbUser, setDbUser] = useState<UserType | null>(null);
   const { currentUser } = useAuth();
+
+  console.log(dbUser);
 
   // Fetch current user information from database - UseQuery Method
   const { data, refetch: fetchUser } = useQuery({

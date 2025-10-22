@@ -15,15 +15,6 @@ export const isValidPassword = (password: string) => {
   );
 };
 
-// Ensures a username contains only:
-// - Lowercase letters (a-z)
-// - Uppercase letter (A-Z)
-// - Digits (0-9)
-// - Underscores (_)
-export const isValidUsername = (username: string) => {
-  return /^[a-zA-Z0-9_]+$/.test(username);
-};
-
 // Ensures a team name / league name contains only:
 // - Lowercase letters (a-z)
 // - Uppercase letters (A-Z)
