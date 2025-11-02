@@ -18,6 +18,9 @@ import { Toaster } from "react-hot-toast";
 import PropertyListing from "./pages/AddProperty";
 import EditProperty from "./pages/EditProperty";
 import BookProperty from "./pages/BookProperty";
+import ContactSupport from "./pages/ContactSupport";
+import Help from "./pages/Help";
+import SupportTickets from "./pages/SupportTickets";
 
 function App() {
   return (
@@ -44,6 +47,10 @@ function App() {
             <Route path="/property/:id" element={<PropertyDetail />} />
             <Route path="/property/:id/edit" element={<EditProperty />} />
             <Route path="/property/:id/book" element={<BookProperty />} />
+
+            <Route path="/contact-support" element={<ContactSupport />} />
+            <Route path="/help" element={<Help />} />
+            <Route path="/admin/support-tickets" element={<SupportTickets />} />
           </Routes>
         </main>
         <Footer />
