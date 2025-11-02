@@ -9,8 +9,6 @@ import { auth } from "@/firebase/firebase";
 import { signOut } from "firebase/auth";
 import PrimaryButton from "./reuseit/PrimaryButton";
 import SecondaryButton from "./reuseit/SecondaryButton";
-import SignupModal from "./SignupModal";
-import LoginModal from "./LoginModal";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { useAuth } from "@/context/AuthContext";
 import { RiAccountPinCircleLine } from "react-icons/ri";
@@ -19,6 +17,7 @@ import { FaUserPlus } from "react-icons/fa6";
 import { PiSignOutFill } from "react-icons/pi";
 import Avatar from "./reuseit/Avatar";
 import AlertModal from "./reuseit/AlertModal";
+import logo from "@/assets/logo.png";
 
 const Navbar = () => {
   const { isDarkMode, toggleDarkMode } = useDarkMode() as ContextValue;
@@ -26,8 +25,6 @@ const Navbar = () => {
   const { currentUser } = useAuth();
   const [open, setOpen] = useState(false);
   const [isSignOutModalOpen, setIsSignOutModalOpen] = useState(false);
-  const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleSearch = (link: string) => {
@@ -80,39 +77,18 @@ const Navbar = () => {
         </div>
       </AlertModal>
 
-      {/* Sign Up Modal */}
-      <SignupModal
-        moveToLogin={() => {
-          setIsSignUpModalOpen(false);
-          setIsLoginModalOpen(true);
-        }}
-        isModalOpen={isSignUpModalOpen}
-        setIsModalOpen={() => setIsSignUpModalOpen(false)}
-      />
 
-      {/* Login Modal */}
-      <LoginModal
-        moveToSignup={() => {
-          setIsLoginModalOpen(false);
-          setIsSignUpModalOpen(true);
-        }}
-        isModalOpen={isLoginModalOpen}
-        setIsModalOpen={() => setIsLoginModalOpen(false)}
-      />
 
       <nav
         className={`dark:bg-darkbg relative z-2 flex items-center justify-between bg-white px-10 py-3 font-f1 dark:text-white`}
       >
-        {/* StayFinder */}
+        {/* Logo */}
         <Link to="/" aria-label="Home" className="flex gap-x-2 items-center">
-          {/* <img
-            src={isDarkMode ? logoDark : logo}
+          <img
+            src={logo}
             alt="StayFinder"
-            className="h-8 cursor-pointer"
-          /> */}
-          <span className="hidden md:block font-semibold text-2xl">
-            StayFinder
-          </span>
+            className="h-10 cursor-pointer"
+          />
         </Link>
 
         {/* LG screen links */}
@@ -125,34 +101,40 @@ const Navbar = () => {
             Home
           </Link>
 
+          {/* Properties Page */}
+          <Link
+            to="/properties"
+            className="hover:text-cta dark:hover:text-darkmodeCTA transition-all"
+          >
+            Properties
+          </Link>
+
           {dbUser ? (
             <>
-              <Link
-                to="/"
-                className="hover:text-cta dark:hover:text-darkmodeCTA transition-all"
-              >
-                Home
-              </Link>
+              {dbUser.role === "HOST" && (
+                <Link
+                  to="/property-listing"
+                  className="hover:text-cta dark:hover:text-darkmodeCTA transition-all"
+                >
+                  Add Property
+                </Link>
+              )}
             </>
           ) : (
             <>
-              {location.pathname != "/signup" && (
-                <button
-                  onClick={() => setIsSignUpModalOpen(true)}
-                  className="cursor-pointer hover:text-cta dark:hover:text-darkmodeCTA transition-all"
-                >
-                  Sign up
-                </button>
-              )}
+              <Link
+                to="/signup"
+                className="hover:text-cta dark:hover:text-darkmodeCTA transition-all"
+              >
+                Sign up
+              </Link>
 
-              {location.pathname != "/signin" && (
-                <button
-                  onClick={() => setIsLoginModalOpen(true)}
-                  className="cursor-pointer hover:text-cta dark:hover:text-darkmodeCTA transition-all"
-                >
-                  Sign in
-                </button>
-              )}
+              <Link
+                to="/signin"
+                className="hover:text-cta dark:hover:text-darkmodeCTA transition-all"
+              >
+                Sign in
+              </Link>
             </>
           )}
 
@@ -216,8 +198,7 @@ const Navbar = () => {
                       <NavLink
                         to="/edit-profile"
                         className={({ isActive }) =>
-                          `flex gap-x-5 items-center font-medium text-lg py-2 px-5 rounded hover:bg-slate-50 dark:hover:bg-white/10 dark:hover:bg-darkgrey w-full transition-all ${
-                            isActive && "bg-slate-100 dark:bg-white/20"
+                          `flex gap-x-5 items-center font-medium text-lg py-2 px-5 rounded hover:bg-slate-50 dark:hover:bg-white/10 dark:hover:bg-darkgrey w-full transition-all ${isActive && "bg-slate-100 dark:bg-white/20"
                           }`
                         }
                       >
@@ -234,8 +215,7 @@ const Navbar = () => {
                       <NavLink
                         to="/onboarding"
                         className={({ isActive }) =>
-                          `flex gap-x-5 items-center font-medium bg-purple-100 text-black dark:bg-darkgrey text-lg py-2 px-5 rounded w-full transition-all ${
-                            isActive && "bg-slate-100 dark:bg-white/20"
+                          `flex gap-x-5 items-center font-medium bg-purple-100 text-black dark:bg-darkgrey text-lg py-2 px-5 rounded w-full transition-all ${isActive && "bg-slate-100 dark:bg-white/20"
                           }`
                         }
                       >
@@ -260,26 +240,26 @@ const Navbar = () => {
                   {/* Sign up */}
                   {!currentUser && (
                     <>
-                      <button
-                        onClick={() => setIsSignUpModalOpen(true)}
-                        className={`cursor-pointer flex gap-x-5 items-center font-medium text-lg py-2 px-5 rounded hover:bg-slate-50 dark:hover:bg-white/10 dark:hover:bg-darkgrey  w-full transition-all `}
+                      <Link
+                        to="/signup"
+                        className="flex gap-x-5 items-center font-medium text-lg py-2 px-5 rounded hover:bg-slate-50 dark:hover:bg-white/10 dark:hover:bg-darkgrey w-full transition-all"
                       >
                         <FaUserPlus className="text-xl" />
                         Sign up
-                      </button>
+                      </Link>
                       <hr />
                     </>
                   )}
 
                   {/* Log in */}
                   {!currentUser && (
-                    <button
-                      onClick={() => setIsLoginModalOpen(true)}
-                      className={`cursor-pointer flex gap-x-5 items-center font-medium text-lg py-2 px-5 rounded hover:bg-slate-50 dark:hover:bg-white/10 dark:hover:bg-darkgrey  w-full transition-all `}
+                    <Link
+                      to="/signin"
+                      className="flex gap-x-5 items-center font-medium text-lg py-2 px-5 rounded hover:bg-slate-50 dark:hover:bg-white/10 dark:hover:bg-darkgrey w-full transition-all"
                     >
                       <CgLogOut className="text-xl rotate-180" />
                       Sign in
-                    </button>
+                    </Link>
                   )}
                 </div>
               </PopoverContent>
@@ -338,8 +318,7 @@ const Navbar = () => {
                     <NavLink
                       to="/edit-profile"
                       className={({ isActive }) =>
-                        `flex gap-x-5 items-center font-medium text-lg py-2 px-5 rounded hover:bg-slate-50 dark:hover:bg-white/10 dark:hover:bg-darkgrey w-full transition-all ${
-                          isActive && "bg-slate-100 dark:bg-white/20"
+                        `flex gap-x-5 items-center font-medium text-lg py-2 px-5 rounded hover:bg-slate-50 dark:hover:bg-white/10 dark:hover:bg-darkgrey w-full transition-all ${isActive && "bg-slate-100 dark:bg-white/20"
                         }`
                       }
                     >
@@ -356,8 +335,7 @@ const Navbar = () => {
                     <NavLink
                       to="/onboarding"
                       className={({ isActive }) =>
-                        `flex gap-x-5 items-center font-medium bg-purple-100 text-black dark:bg-darkgrey text-lg py-2 px-5 rounded w-full transition-all ${
-                          isActive && "bg-slate-100 dark:bg-white/20"
+                        `flex gap-x-5 items-center font-medium bg-purple-100 text-black dark:bg-darkgrey text-lg py-2 px-5 rounded w-full transition-all ${isActive && "bg-slate-100 dark:bg-white/20"
                         }`
                       }
                     >
@@ -385,8 +363,7 @@ const Navbar = () => {
                     <NavLink
                       to="/signup"
                       className={({ isActive }) =>
-                        `flex gap-x-5 items-center font-medium text-lg py-2 px-5 rounded hover:bg-slate-50 dark:hover:bg-white/10 dark:hover:bg-darkgrey  w-full transition-all ${
-                          isActive && "bg-slate-100 dark:bg-white/20"
+                        `flex gap-x-5 items-center font-medium text-lg py-2 px-5 rounded hover:bg-slate-50 dark:hover:bg-white/10 dark:hover:bg-darkgrey  w-full transition-all ${isActive && "bg-slate-100 dark:bg-white/20"
                         }`
                       }
                     >
@@ -402,8 +379,7 @@ const Navbar = () => {
                   <NavLink
                     to="/signin"
                     className={({ isActive }) =>
-                      `flex gap-x-5 items-center font-medium text-lg py-2 px-5 rounded hover:bg-slate-50 dark:hover:bg-white/10 dark:hover:bg-darkgrey w-full transition-all ${
-                        isActive && "bg-slate-100 dark:bg-white/20"
+                      `flex gap-x-5 items-center font-medium text-lg py-2 px-5 rounded hover:bg-slate-50 dark:hover:bg-white/10 dark:hover:bg-darkgrey w-full transition-all ${isActive && "bg-slate-100 dark:bg-white/20"
                       }`
                     }
                   >
@@ -423,9 +399,8 @@ const Navbar = () => {
 
         {/* Drawer Menu */}
         <div
-          className={`dark:bg-darkbg scroller fixed top-0 right-0 z-50 h-screen w-full overflow-y-auto bg-white pb-6 text-center text-xl shadow-md md:text-lg ${
-            open ? "translate-x-0" : "translate-x-[100%]"
-          } transition-all duration-500`}
+          className={`dark:bg-darkbg scroller fixed top-0 right-0 z-50 h-screen w-full overflow-y-auto bg-white pb-6 text-center text-xl shadow-md md:text-lg ${open ? "translate-x-0" : "translate-x-[100%]"
+            } transition-all duration-500`}
           role="dialog"
           aria-modal="true"
           aria-label="Drawer Menu"
@@ -436,12 +411,11 @@ const Navbar = () => {
               onClick={() => handleSearch("/")}
               aria-label="Home"
             >
-              {/* <img
-                src={isDarkMode ? logoDark : logo}
+              <img
+                src={logo}
                 alt="StayFinder"
-                className="h-8 cursor-pointer"
-              /> */}
-              <span className="font-semibold text-2xl">StayFinder</span>
+                className="h-10 cursor-pointer"
+              />
             </button>
             <RxCross2
               onClick={() => setOpen(false)}
@@ -460,6 +434,26 @@ const Navbar = () => {
             >
               Home
             </button>
+
+            <button
+              onClick={() => handleSearch("/properties")}
+              className="hover:text-cta w-fit cursor-pointer transition-all"
+              tabIndex={0}
+              aria-label="Browse Properties"
+            >
+              Properties
+            </button>
+
+            {dbUser?.role === "HOST" && (
+              <button
+                onClick={() => handleSearch("/property-listing")}
+                className="hover:text-cta w-fit cursor-pointer transition-all"
+                tabIndex={0}
+                aria-label="Add Property"
+              >
+                Add Property
+              </button>
+            )}
 
             {!dbUser && (
               <>

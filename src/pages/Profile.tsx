@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { PrimaryButton, SecondaryButton } from "../components";
+import { PrimaryButton, SecondaryButton, HostProperties, UserBookings } from "../components";
 import { useDBUser } from "../context/UserContext";
 import { BsFillTrash3Fill, BsPen } from "react-icons/bs";
 import { useNavigate } from "react-router-dom";
@@ -16,7 +16,7 @@ const Profile = () => {
   const navigate = useNavigate();
   const { dbUser, setDbUser } = useDBUser();
   const [disabled, setDisabled] = useState(false);
-  const [tabValue, setTabValue] = useState("teams");
+  const [tabValue, setTabValue] = useState("properties");
   const [isDeleteProfileModalOpen, setIsDeleteProfileModalOpen] =
     useState(false);
 
@@ -24,6 +24,15 @@ const Profile = () => {
   useEffect(() => {
     document.title = `${dbUser?.name} | StayFinder`;
   }, [dbUser]);
+
+  // Set initial tab based on user role
+  useEffect(() => {
+    if (dbUser?.role === "HOST") {
+      setTabValue("properties");
+    } else {
+      setTabValue("bookings");
+    }
+  }, [dbUser?.role]);
 
   // Scroll to top
   useEffect(() => {
@@ -180,26 +189,114 @@ const Profile = () => {
 
         {/* Tab Buttons */}
         <div className="flex">
-          {/* Teams Tab Button */}
-          <button
-            onClick={() => setTabValue("teams")}
-            className={`flex-1 py-3 cursor-pointer transition-all duration-300 border-b-4 ${
-              tabValue == "teams" &&
-              "text-cta border-cta dark:text-white dark:border-darkmodeCTA"
-            }`}
-          >
-            Teams
-          </button>
-          {/* Leagues Tab Button */}
-          <button
-            onClick={() => setTabValue("leagues")}
-            className={`flex-1 py-3 cursor-pointer transition-all duration-300 border-b-4  ${
-              tabValue == "leagues" &&
-              "text-cta border-cta dark:text-white dark:border-darkmodeCTA"
-            }`}
-          >
-            Leagues
-          </button>
+          {dbUser?.role === "HOST" ? (
+            <>
+              {/* Properties Tab Button */}
+              <button
+                onClick={() => setTabValue("properties")}
+                className={`flex-1 py-3 cursor-pointer transition-all duration-300 border-b-4 ${tabValue == "properties" &&
+                  "text-cta border-cta dark:text-white dark:border-darkmodeCTA"
+                  }`}
+              >
+                My Properties
+              </button>
+              {/* Bookings Tab Button */}
+              <button
+                onClick={() => setTabValue("bookings")}
+                className={`flex-1 py-3 cursor-pointer transition-all duration-300 border-b-4  ${tabValue == "bookings" &&
+                  "text-cta border-cta dark:text-white dark:border-darkmodeCTA"
+                  }`}
+              >
+                Bookings Received
+              </button>
+            </>
+          ) : (
+            <>
+              {/* My Bookings Tab Button */}
+              <button
+                onClick={() => setTabValue("bookings")}
+                className={`flex-1 py-3 cursor-pointer transition-all duration-300 border-b-4 ${tabValue == "bookings" &&
+                  "text-cta border-cta dark:text-white dark:border-darkmodeCTA"
+                  }`}
+              >
+                My Bookings
+              </button>
+              {/* Favorites Tab Button */}
+              <button
+                onClick={() => setTabValue("favorites")}
+                className={`flex-1 py-3 cursor-pointer transition-all duration-300 border-b-4  ${tabValue == "favorites" &&
+                  "text-cta border-cta dark:text-white dark:border-darkmodeCTA"
+                  }`}
+              >
+                Favorites
+              </button>
+            </>
+          )}
+        </div>
+
+        {/* Tab Content */}
+        <div className="p-6">
+          {dbUser?.role === "HOST" && tabValue === "properties" && (
+            <HostProperties />
+          )}
+
+          {tabValue === "bookings" && (
+            <>
+              {dbUser?.role === "HOST" ? (
+                <div className="text-center py-16">
+                  <div className="mb-4">
+                    <svg
+                      className="w-16 h-16 text-gray-300 mx-auto"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={1}
+                        d="M8 7V3a2 2 0 012-2h4a2 2 0 012 2v4m-6 0h6m-6 0l-1 12a2 2 0 002 2h6a2 2 0 002-2L16 7"
+                      />
+                    </svg>
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-600 mb-2">
+                    No bookings received yet
+                  </h3>
+                  <p className="text-gray-500">
+                    Bookings from guests will appear here
+                  </p>
+                </div>
+              ) : (
+                <UserBookings />
+              )}
+            </>
+          )}
+
+          {dbUser?.role === "GUEST" && tabValue === "favorites" && (
+            <div className="text-center py-16">
+              <div className="mb-4">
+                <svg
+                  className="w-16 h-16 text-gray-300 mx-auto"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1}
+                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-600 mb-2">
+                No favorites yet
+              </h3>
+              <p className="text-gray-500">
+                Properties you favorite will appear here
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </>

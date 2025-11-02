@@ -5,6 +5,8 @@ import Onboarding from "./Onboarding";
 import Signout from "./Signout";
 import ForgotPassword from "./ForgotPassword";
 import AuthAction from "./AuthAction";
+import AllProperties from "./AllProperties";
+import PropertyDetail from "./PropertyDetail";
 
 export {
   Landing,
@@ -14,4 +16,6 @@ export {
   Signout,
   ForgotPassword,
   AuthAction,
+  AllProperties,
+  PropertyDetail,
 };

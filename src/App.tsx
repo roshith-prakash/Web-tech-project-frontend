@@ -7,12 +7,17 @@ import {
   Onboarding,
   Signout,
   Signup,
+  AllProperties,
+  PropertyDetail,
 } from "./pages";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Profile from "./pages/Profile";
 import EditProfile from "./pages/EditProfile";
 import SignupHost from "./pages/SignupHost";
 import { Toaster } from "react-hot-toast";
+import PropertyListing from "./pages/AddProperty";
+import EditProperty from "./pages/EditProperty";
+import BookProperty from "./pages/BookProperty";
 
 function App() {
   return (
@@ -33,6 +38,12 @@ function App() {
 
             <Route path="/profile" element={<Profile />} />
             <Route path="/edit-profile" element={<EditProfile />} />
+
+            <Route path="/property-listing" element={<PropertyListing />} />
+            <Route path="/properties" element={<AllProperties />} />
+            <Route path="/property/:id" element={<PropertyDetail />} />
+            <Route path="/property/:id/edit" element={<EditProperty />} />
+            <Route path="/property/:id/book" element={<BookProperty />} />
           </Routes>
         </main>
         <Footer />
