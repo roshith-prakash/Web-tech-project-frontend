@@ -66,6 +66,18 @@ const BookProperty = () => {
         }
     }, [dbUser, id, navigate]);
 
+    // Debug property data
+    useEffect(() => {
+        if (property) {
+            console.log("🏨 Property data loaded:", property);
+            console.log("🚫 Unavailable dates:", property.unavailableDates);
+            console.log("📊 Unavailable dates count:", property.unavailableDates?.length || 0);
+            if (property.unavailableDates && property.unavailableDates.length > 0) {
+                console.log("📅 First unavailable date sample:", property.unavailableDates[0]);
+            }
+        }
+    }, [property]);
+
     // Calculate total price and nights
     const calculateBookingDetails = () => {
         if (!checkInDate || !checkOutDate || !property) {

@@ -66,12 +66,51 @@ const DatePicker = ({
             return true;
         }
 
+        // Debug logging
+        console.log("🚫 Checking if date is blocked:", {
+            date: dateString,
+            blockedDatesCount: blockedDates.length,
+            blockedDates: blockedDates
+        });
+
         // Check if date falls within any blocked range
         return blockedDates.some((range) => {
-            const startDate = new Date(range.startDate + 'T00:00:00');
-            const endDate = new Date(range.endDate + 'T00:00:00');
+            if (!range || !range.startDate || !range.endDate) {
+                console.log("❌ Invalid range:", range);
+                return false;
+            }
+
+            // Handle different date formats more robustly
+            let startDate: Date;
+            let endDate: Date;
+
+            // If the dates are already strings (ISO format from JSON)
+            if (typeof range.startDate === 'string') {
+                startDate = new Date(range.startDate);
+                endDate = new Date(range.endDate);
+            } else {
+                // If they're Date objects, use them directly
+                startDate = new Date(range.startDate);
+                endDate = new Date(range.endDate);
+            }
+
+            // Ensure we have valid dates
+            if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+                console.log("❌ Invalid dates in range:", { startDate, endDate, range });
+                return false;
+            }
+
             const checkDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-            return checkDate >= startDate && checkDate <= endDate;
+            const isBlocked = checkDate >= startDate && checkDate <= endDate;
+
+            console.log("📅 Date range check:", {
+                checkDate: checkDate.toISOString().split('T')[0],
+                startDate: startDate.toISOString().split('T')[0],
+                endDate: endDate.toISOString().split('T')[0],
+                isBlocked
+            });
+
+            return isBlocked;
         });
     };
 
