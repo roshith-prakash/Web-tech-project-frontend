@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
 import { useInView } from "react-intersection-observer";
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { Input } from "@/components/ui/input";
 import { PrimaryButton, CompactMapEmbed, FavoriteButton } from "@/components";
+import dayjs from "dayjs";
 
 // Property type based on schema.prisma
 interface Property {
@@ -35,12 +36,25 @@ interface PropertyResponse {
 
 const PROPERTIES_PER_PAGE = 12;
 
-const fetchProperties = async (page: number, search: string = ""): Promise<PropertyResponse> => {
-  const response = await axiosInstance.post("/guest/get-all-properties", {
+const fetchProperties = async (
+  page: number,
+  search: string = "",
+  checkIn: string = "",
+  checkOut: string = ""
+): Promise<PropertyResponse> => {
+  const requestData: any = {
     page,
     limit: PROPERTIES_PER_PAGE,
     search,
-  });
+  };
+
+  if (checkIn && checkOut) {
+    requestData.checkIn = checkIn;
+    requestData.checkOut = checkOut;
+  }
+
+  console.log('🔍 Fetching properties with params:', requestData);
+  const response = await axiosInstance.post("/guest/get-all-properties", requestData);
   return response.data;
 };
 
@@ -77,7 +91,6 @@ const PropertyCard = ({ property, showMap = false }: { property: Property; showM
       </div>
 
       <Link to={`/property/${property.id}`} className="block">
-
         {/* Property Details */}
         <div className="p-4">
           <h3 className="text-lg font-semibold text-gray-800 mb-2 line-clamp-1">
@@ -150,8 +163,15 @@ const PropertyCard = ({ property, showMap = false }: { property: Property; showM
 };
 
 const AllProperties = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [searchParams] = useSearchParams();
+  const initialSearch = searchParams.get('search') || '';
+  const initialCheckIn = searchParams.get('checkIn') || '';
+  const initialCheckOut = searchParams.get('checkOut') || '';
+
+  const [searchTerm, setSearchTerm] = useState(initialSearch);
+  const [debouncedSearch, setDebouncedSearch] = useState(initialSearch);
+  const [checkInDate, setCheckInDate] = useState(initialCheckIn);
+  const [checkOutDate, setCheckOutDate] = useState(initialCheckOut);
   const [allProperties, setAllProperties] = useState<Property[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -172,17 +192,34 @@ const AllProperties = () => {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  // Reset when search changes
+  // Handle URL parameter changes (only on mount and searchParams change)
+  useEffect(() => {
+    const urlSearch = searchParams.get('search') || '';
+    const urlCheckIn = searchParams.get('checkIn') || '';
+    const urlCheckOut = searchParams.get('checkOut') || '';
+
+    console.log('🔍 AllProperties received URL parameters:', {
+      search: urlSearch,
+      checkIn: urlCheckIn,
+      checkOut: urlCheckOut
+    });
+
+    setSearchTerm(urlSearch);
+    setCheckInDate(urlCheckIn);
+    setCheckOutDate(urlCheckOut);
+  }, [searchParams]);
+
+  // Reset when search or dates change
   useEffect(() => {
     setAllProperties([]);
     setCurrentPage(1);
     setHasMore(true);
-  }, [debouncedSearch]);
+  }, [debouncedSearch, checkInDate, checkOutDate]);
 
   // Fetch properties
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ["properties", currentPage, debouncedSearch],
-    queryFn: () => fetchProperties(currentPage, debouncedSearch),
+    queryKey: ["properties", currentPage, debouncedSearch, checkInDate, checkOutDate],
+    queryFn: () => fetchProperties(currentPage, debouncedSearch, checkInDate, checkOutDate),
     staleTime: 1000 * 60 * 5, // 5 minutes
     enabled: hasMore || currentPage === 1,
   });
@@ -210,8 +247,21 @@ const AllProperties = () => {
     setSearchTerm(e.target.value);
   }, []);
 
+  const handleCheckInChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setCheckInDate(e.target.value);
+  }, []);
+
+  const handleCheckOutChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setCheckOutDate(e.target.value);
+  }, []);
+
   const clearSearch = () => {
     setSearchTerm("");
+  };
+
+  const clearDates = () => {
+    setCheckInDate("");
+    setCheckOutDate("");
   };
 
   return (
@@ -225,6 +275,7 @@ const AllProperties = () => {
 
           {/* Map Toggle Button */}
           <button
+            type="button"
             onClick={() => setShowMaps(!showMaps)}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 transition-all ${showMaps
               ? "bg-blue-600 text-white border-blue-600"
@@ -239,27 +290,102 @@ const AllProperties = () => {
           </button>
         </div>
 
-        {/* Search Bar */}
-        <div className="relative max-w-md">
-          <Input
-            type="text"
-            placeholder="Search by property name, location, or host..."
-            value={searchTerm}
-            onChange={handleSearch}
-            className="pr-20"
-          />
-          {searchTerm && (
-            <button
-              onClick={clearSearch}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          )}
+        {/* Search and Date Filters */}
+        <div className="flex flex-col md:flex-row gap-4 max-w-4xl md:items-end">
+          {/* Search Bar */}
+          <div className="relative flex-1">
+            <label className="block text-sm text-gray-600 mb-2 font-medium">Search Properties</label>
+            <Input
+              type="text"
+              placeholder="Search by property name, location, or host..."
+              value={searchTerm}
+              onChange={handleSearch}
+              className="pr-20 h-12"
+            />
+            {searchTerm && (
+              <button
+                type="button"
+                onClick={clearSearch}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+          </div>
+
+          {/* Date Filters */}
+          <div className="flex gap-2 items-end">
+            <div className="relative">
+              <label className="block text-sm text-gray-600 mb-2 font-medium">Check-in</label>
+              <input
+                type="date"
+                value={checkInDate}
+                onChange={handleCheckInChange}
+                min={new Date().toISOString().split('T')[0]}
+                className="w-40 px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent h-12"
+              />
+            </div>
+            <div className="relative">
+              <label className="block text-sm text-gray-600 mb-2 font-medium">Check-out</label>
+              <input
+                type="date"
+                value={checkOutDate}
+                onChange={handleCheckOutChange}
+                min={checkInDate || new Date().toISOString().split('T')[0]}
+                className="w-40 px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent h-12"
+              />
+            </div>
+            {(checkInDate || checkOutDate) && (
+              <button
+                type="button"
+                onClick={clearDates}
+                className="px-3 py-2 text-gray-400 hover:text-gray-600 transition-colors h-12 flex items-center"
+                title="Clear dates"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+          </div>
         </div>
       </div>
+
+      {/* Active Filters Display */}
+      {(searchTerm || checkInDate || checkOutDate) && (
+        <div className="mb-6">
+          <div className="flex flex-wrap gap-2 items-center">
+            <span className="text-sm text-gray-600">Active filters:</span>
+            {searchTerm && (
+              <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm flex items-center gap-1">
+                Location: {searchTerm}
+                <button type="button" onClick={clearSearch} className="ml-1 hover:text-blue-900">×</button>
+              </span>
+            )}
+            {checkInDate && (
+              <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+                Check-in: {dayjs(checkInDate).format('DD/MM/YYYY')}
+              </span>
+            )}
+            {checkOutDate && (
+              <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+                Check-out: {dayjs(checkOutDate).format('DD/MM/YYYY')}
+              </span>
+            )}
+            {(checkInDate || checkOutDate) && (
+              <button
+                type="button"
+                onClick={clearDates}
+                className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm hover:bg-gray-200 transition-colors"
+              >
+                Clear dates
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Loading State for Initial Load */}
       {isLoading && currentPage === 1 && (

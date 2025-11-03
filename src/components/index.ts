@@ -13,6 +13,7 @@ import HostBookings from "./HostBookings";
 import DatePicker from "./DatePicker";
 import FavoriteButton from "./FavoriteButton";
 import UserFavorites from "./UserFavorites";
+import NotificationBell from "./NotificationBell";
 
 export {
   PrimaryButton,
@@ -30,4 +31,5 @@ export {
   DatePicker,
   FavoriteButton,
   UserFavorites,
+  NotificationBell,
 };

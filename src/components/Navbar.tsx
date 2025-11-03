@@ -18,6 +18,7 @@ import { PiSignOutFill } from "react-icons/pi";
 import { BsChevronDown } from "react-icons/bs";
 import Avatar from "./reuseit/Avatar";
 import AlertModal from "./reuseit/AlertModal";
+import NotificationBell from "./NotificationBell";
 import logo from "@/assets/logo.png";
 
 const Navbar = () => {
@@ -175,8 +176,13 @@ const Navbar = () => {
           )}
         </div>
 
-        {/* Theme + Popover - Large Screen */}
+        {/* Theme + Notifications + Popover - Large Screen */}
         <div className="flex items-center gap-x-5">
+          {/* Notification Bell */}
+          <div className="hidden lg:block">
+            <NotificationBell />
+          </div>
+
           {/* Theme change button */}
           <button
             aria-label="Change Theme"
@@ -311,7 +317,10 @@ const Navbar = () => {
         </div>
 
         {/* Open Drawer */}
-        <div className="flex items-center gap-x-10 font-medium lg:hidden">
+        <div className="flex items-center gap-x-4 font-medium lg:hidden">
+          {/* Notification Bell */}
+          <NotificationBell />
+
           {/* Toggle Light & Dark Mode */}
           <button
             className="cursor-pointer"
@@ -505,6 +514,17 @@ const Navbar = () => {
             >
               Properties
             </button>
+
+            {dbUser && (
+              <button
+                onClick={() => handleSearch("/notifications")}
+                className="hover:text-cta w-fit cursor-pointer transition-all"
+                tabIndex={0}
+                aria-label="Notifications"
+              >
+                Notifications
+              </button>
+            )}
 
             {dbUser?.role === "HOST" && (
               <button
