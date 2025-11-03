@@ -5,6 +5,7 @@ import { axiosInstance } from "@/utils/axiosInstance";
 import { useDBUser } from "@/context/UserContext";
 import { PrimaryButton, SecondaryButton, DatePicker } from "@/components";
 import { toast } from "react-hot-toast";
+import dayjs from "dayjs";
 
 interface Property {
     id: string;
@@ -135,7 +136,9 @@ const BookProperty = () => {
         }
 
         // Check if dates are in the past
-        if (new Date(checkInDate) < new Date().setHours(0, 0, 0, 0)) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        if (new Date(checkInDate) < today) {
             toast.error("Check-in date cannot be in the past.");
             return;
         }
@@ -344,13 +347,13 @@ const BookProperty = () => {
                                     <div className="flex justify-between">
                                         <span className="text-gray-600">Check-in:</span>
                                         <span className="font-medium">
-                                            {new Date(checkInDate + 'T00:00:00').toLocaleDateString()}
+                                            {dayjs(checkInDate).format('DD/MM/YYYY')}
                                         </span>
                                     </div>
                                     <div className="flex justify-between">
                                         <span className="text-gray-600">Check-out:</span>
                                         <span className="font-medium">
-                                            {new Date(checkOutDate + 'T00:00:00').toLocaleDateString()}
+                                            {dayjs(checkOutDate).format('DD/MM/YYYY')}
                                         </span>
                                     </div>
                                     <div className="flex justify-between">

@@ -6,6 +6,7 @@ import { useDBUser } from "@/context/UserContext";
 import { PrimaryButton, SecondaryButton } from "@/components";
 import { BsEye, BsCalendar, BsCreditCard, BsX, BsExclamationTriangle, BsTrash } from "react-icons/bs";
 import { toast } from "react-hot-toast";
+import dayjs from "dayjs";
 
 
 interface Booking {
@@ -113,13 +114,13 @@ const parseDate = (dateValue: any): Date | null => {
     return null;
 };
 
-// Helper function to format dates safely
+// Helper function to format dates safely using dayjs
 const formatDateSafe = (dateValue: any): string => {
     const date = parseDate(dateValue);
     if (!date) return 'Invalid Date';
 
     try {
-        return date.toLocaleDateString();
+        return dayjs(date).format('DD/MM/YYYY');
     } catch (error) {
         console.error('Date formatting error:', error);
         return 'Invalid Date';
@@ -704,7 +705,7 @@ const BookingCard = ({
                             <button
                                 onClick={() => setShowDeleteModal(true)}
                                 disabled={isDeleting}
-                                className="w-full px-3 py-2 bg-gray-50 text-gray-600 border border-gray-200 rounded-md hover:bg-gray-100 hover:border-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                className="w-full px-3 py-2 bg-red-50 text-red-600 border border-red-200 rounded-md hover:bg-red-100 hover:border-red-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                             >
                                 <BsTrash className="w-4 h-4" />
                                 {isDeleting ? "Deleting..." : "Delete Booking"}

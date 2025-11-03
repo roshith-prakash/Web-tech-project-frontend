@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { PrimaryButton, SecondaryButton, HostProperties, UserBookings } from "../components";
+import { PrimaryButton, SecondaryButton, HostProperties, UserBookings, HostBookings } from "../components";
 import { useDBUser } from "../context/UserContext";
 import { BsFillTrash3Fill, BsPen } from "react-icons/bs";
 import { useNavigate } from "react-router-dom";
@@ -243,29 +243,7 @@ const Profile = () => {
           {tabValue === "bookings" && (
             <>
               {dbUser?.role === "HOST" ? (
-                <div className="text-center py-16">
-                  <div className="mb-4">
-                    <svg
-                      className="w-16 h-16 text-gray-300 mx-auto"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={1}
-                        d="M8 7V3a2 2 0 012-2h4a2 2 0 012 2v4m-6 0h6m-6 0l-1 12a2 2 0 002 2h6a2 2 0 002-2L16 7"
-                      />
-                    </svg>
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-600 mb-2">
-                    No bookings received yet
-                  </h3>
-                  <p className="text-gray-500">
-                    Bookings from guests will appear here
-                  </p>
-                </div>
+                <HostBookings />
               ) : (
                 <UserBookings />
               )}

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Clock, Mail, Phone, AlertCircle, CheckCircle, XCircle } from "lucide-react";
+import dayjs from "dayjs";
 
 interface SupportTicket {
     id: string;
@@ -122,8 +123,8 @@ const SupportTickets = () => {
                                 key={status}
                                 onClick={() => setFilter(status)}
                                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filter === status
-                                        ? 'bg-blue-600 text-white'
-                                        : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
+                                    ? 'bg-blue-600 text-white'
+                                    : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
                                     }`}
                             >
                                 {status.charAt(0).toUpperCase() + status.slice(1).replace('-', ' ')}
@@ -166,7 +167,7 @@ const SupportTickets = () => {
                                             </span>
                                             <span>From: {ticket.name}</span>
                                             <span>ID: {ticket.id}</span>
-                                            <span>{new Date(ticket.timestamp).toLocaleString()}</span>
+                                            <span>{dayjs(ticket.timestamp).format('DD/MM/YYYY HH:mm')}</span>
                                         </div>
 
                                         <p className="text-gray-700 mb-4">{ticket.message}</p>

@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useDBUser } from "@/context/UserContext";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { PrimaryButton, SecondaryButton, GoogleMapEmbed } from "@/components";
+import dayjs from "dayjs";
 
 interface Property {
   id: string;
@@ -260,7 +261,7 @@ const PropertyDetail = () => {
                 <div>
                   <p className="text-gray-500">Listed</p>
                   <p className="font-medium text-gray-800">
-                    {new Date(property.createdAt).toLocaleDateString()}
+                    {dayjs(property.createdAt).format('DD/MM/YYYY')}
                   </p>
                 </div>
               </div>

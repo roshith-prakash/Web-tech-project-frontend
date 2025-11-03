@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { BsChevronLeft, BsChevronRight } from "react-icons/bs";
+import dayjs from "dayjs";
 
 interface DateRange {
     startDate: string;
@@ -116,12 +117,7 @@ const DatePicker = ({
 
     const formatDisplayDate = (dateString: string) => {
         if (!dateString) return placeholder;
-        return new Date(dateString + 'T00:00:00').toLocaleDateString('en-US', {
-            weekday: 'short',
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
-        });
+        return dayjs(dateString).format('ddd, DD/MM/YYYY');
     };
 
     const handleDateSelect = (date: Date) => {

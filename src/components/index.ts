@@ -9,6 +9,7 @@ import GoogleMapEmbed from "./GoogleMapEmbed";
 import CompactMapEmbed from "./CompactMapEmbed";
 import HostProperties from "./HostProperties";
 import UserBookings from "./UserBookings";
+import HostBookings from "./HostBookings";
 import DatePicker from "./DatePicker";
 
 export {
@@ -23,5 +24,6 @@ export {
   CompactMapEmbed,
   HostProperties,
   UserBookings,
+  HostBookings,
   DatePicker,
 };
