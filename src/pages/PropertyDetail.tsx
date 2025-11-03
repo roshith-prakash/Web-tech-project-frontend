@@ -2,7 +2,7 @@ import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useDBUser } from "@/context/UserContext";
 import { axiosInstance } from "@/utils/axiosInstance";
-import { PrimaryButton, SecondaryButton, GoogleMapEmbed } from "@/components";
+import { PrimaryButton, SecondaryButton, GoogleMapEmbed, FavoriteButton } from "@/components";
 import dayjs from "dayjs";
 
 interface Property {
@@ -171,9 +171,14 @@ const PropertyDetail = () => {
         <div className="lg:col-span-1">
           <div className="bg-white p-6 rounded-xl shadow-lg border sticky top-8">
             {/* Property Title */}
-            <h1 className="text-2xl font-bold text-gray-800 mb-2">
-              {property.title}
-            </h1>
+            <div className="flex items-start justify-between mb-2">
+              <h1 className="text-2xl font-bold text-gray-800 flex-1">
+                {property.title}
+              </h1>
+              {dbUser?.role === "GUEST" && (
+                <FavoriteButton propertyId={property.id} size="lg" className="ml-3" />
+              )}
+            </div>
 
             {/* Host Information */}
             <div className="flex items-center mb-6 p-4 bg-gray-50 rounded-lg">

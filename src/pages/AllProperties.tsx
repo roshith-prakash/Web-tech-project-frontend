@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { Input } from "@/components/ui/input";
-import { PrimaryButton, CompactMapEmbed } from "@/components";
+import { PrimaryButton, CompactMapEmbed, FavoriteButton } from "@/components";
 
 // Property type based on schema.prisma
 interface Property {
@@ -47,9 +47,9 @@ const fetchProperties = async (page: number, search: string = ""): Promise<Prope
 const PropertyCard = ({ property, showMap = false }: { property: Property; showMap?: boolean }) => {
   return (
     <div className="group bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden">
-      <Link to={`/property/${property.id}`} className="block">
-        {/* Property Image */}
-        <div className="relative h-48 overflow-hidden">
+      {/* Property Image */}
+      <div className="relative h-48 overflow-hidden">
+        <Link to={`/property/${property.id}`} className="block w-full h-full">
           {property.imageUrls && property.imageUrls.length > 0 ? (
             <img
               src={property.imageUrls[0]}
@@ -61,14 +61,22 @@ const PropertyCard = ({ property, showMap = false }: { property: Property; showM
               <span className="text-gray-500">No Image</span>
             </div>
           )}
+        </Link>
 
-          {/* Price Badge */}
-          <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg">
-            <span className="text-sm font-semibold text-gray-800">
-              {property.currency || "USD"} {property.pricePerNight}/night
-            </span>
-          </div>
+        {/* Price Badge */}
+        <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg">
+          <span className="text-sm font-semibold text-gray-800">
+            {property.currency || "USD"} {property.pricePerNight}/night
+          </span>
         </div>
+
+        {/* Favorite Button */}
+        <div className="absolute top-3 left-3" onClick={(e) => e.stopPropagation()}>
+          <FavoriteButton propertyId={property.id} size="md" />
+        </div>
+      </div>
+
+      <Link to={`/property/${property.id}`} className="block">
 
         {/* Property Details */}
         <div className="p-4">

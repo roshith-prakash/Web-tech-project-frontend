@@ -13,7 +13,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { useAuth } from "@/context/AuthContext";
 import { RiAccountPinCircleLine } from "react-icons/ri";
 import { CgProfile, CgLogOut } from "react-icons/cg";
-import { FaUserPlus, FaHouse, FaUser } from "react-icons/fa6";
+import { FaHouse, FaUser } from "react-icons/fa6";
 import { PiSignOutFill } from "react-icons/pi";
 import { BsChevronDown } from "react-icons/bs";
 import Avatar from "./reuseit/Avatar";

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { useDBUser } from "@/context/UserContext";
 import { PrimaryButton, SecondaryButton, DatePicker } from "@/components";
@@ -41,6 +41,7 @@ const BookProperty = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const { dbUser } = useDBUser();
+    const queryClient = useQueryClient();
 
     const [checkInDate, setCheckInDate] = useState("");
     const [checkOutDate, setCheckOutDate] = useState("");
@@ -164,6 +165,14 @@ const BookProperty = () => {
             });
 
             toast.success("Booking created successfully!");
+
+            // Invalidate user bookings cache so the new booking appears immediately
+            queryClient.invalidateQueries({ queryKey: ["userBookings", dbUser?.id] });
+
+            // Also invalidate property queries to update availability
+            queryClient.invalidateQueries({ queryKey: ["property", id] });
+            queryClient.invalidateQueries({ queryKey: ["properties"] });
+
             navigate("/profile"); // Redirect to profile to see bookings
         } catch (error: any) {
             toast.error(error.response?.data?.error || "Failed to create booking");

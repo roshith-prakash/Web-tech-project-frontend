@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { PrimaryButton, SecondaryButton, HostProperties, UserBookings, HostBookings } from "../components";
+import { PrimaryButton, SecondaryButton, HostProperties, UserBookings, HostBookings, UserFavorites } from "../components";
 import { useDBUser } from "../context/UserContext";
 import { BsFillTrash3Fill, BsPen } from "react-icons/bs";
 import { useNavigate } from "react-router-dom";
@@ -251,29 +251,7 @@ const Profile = () => {
           )}
 
           {dbUser?.role === "GUEST" && tabValue === "favorites" && (
-            <div className="text-center py-16">
-              <div className="mb-4">
-                <svg
-                  className="w-16 h-16 text-gray-300 mx-auto"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={1}
-                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                  />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-600 mb-2">
-                No favorites yet
-              </h3>
-              <p className="text-gray-500">
-                Properties you favorite will appear here
-              </p>
-            </div>
+            <UserFavorites />
           )}
         </div>
       </div>

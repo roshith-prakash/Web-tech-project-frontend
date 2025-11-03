@@ -11,6 +11,8 @@ import HostProperties from "./HostProperties";
 import UserBookings from "./UserBookings";
 import HostBookings from "./HostBookings";
 import DatePicker from "./DatePicker";
+import FavoriteButton from "./FavoriteButton";
+import UserFavorites from "./UserFavorites";
 
 export {
   PrimaryButton,
@@ -26,4 +28,6 @@ export {
   UserBookings,
   HostBookings,
   DatePicker,
+  FavoriteButton,
+  UserFavorites,
 };
