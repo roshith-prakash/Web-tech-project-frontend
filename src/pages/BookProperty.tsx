@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { useDBUser } from "@/context/UserContext";
-import { PrimaryButton, SecondaryButton, DatePicker } from "@/components";
+import { PrimaryButton, SecondaryButton, DatePicker, ReviewSection } from "@/components";
 import { toast } from "react-hot-toast";
 import dayjs from "dayjs";
 
@@ -30,6 +30,18 @@ interface Property {
         email: string;
         photoURL: string;
     };
+    reviews?: Array<{
+        id: string;
+        rating: number;
+        comment: string;
+        createdAt: string;
+        user: {
+            name: string;
+            photoURL: string;
+        };
+    }>;
+    averageRating?: number;
+    totalReviews?: number;
 }
 
 const fetchProperty = async (id: string): Promise<Property> => {
@@ -233,6 +245,18 @@ const BookProperty = () => {
                 <p className="text-gray-600">Complete your reservation for {property.title}</p>
             </div>
 
+            {/* TEST: Reviews Section at top */}
+            <div className="mb-8 bg-red-100 p-4 rounded-lg">
+                <h2 className="text-xl font-bold text-red-800">TEST: Reviews Section</h2>
+                <p>This should be visible if the component is working</p>
+                <ReviewSection
+                    propertyId={property.id}
+                    initialReviews={property.reviews || []}
+                    averageRating={property.averageRating}
+                    totalReviews={property.totalReviews}
+                />
+            </div>
+
             <div className="grid lg:grid-cols-3 gap-8">
                 {/* Booking Form */}
                 <div className="lg:col-span-2">
@@ -431,6 +455,29 @@ const BookProperty = () => {
                         </div>
                     </div>
                 </div>
+            </div>
+
+            {/* Reviews Section */}
+            <div className="mt-12">
+                {console.log("🔍 Property data for reviews:", {
+                    id: property.id,
+                    reviews: property.reviews,
+                    averageRating: property.averageRating,
+                    totalReviews: property.totalReviews
+                })}
+                <div className="bg-gray-100 p-4 rounded-lg">
+                    <h2 className="text-xl font-bold mb-4">Reviews Section Test</h2>
+                    <p>Property ID: {property.id}</p>
+                    <p>Reviews: {JSON.stringify(property.reviews)}</p>
+                    <p>Average Rating: {property.averageRating}</p>
+                    <p>Total Reviews: {property.totalReviews}</p>
+                </div>
+                <ReviewSection
+                    propertyId={property.id}
+                    initialReviews={property.reviews || []}
+                    averageRating={property.averageRating}
+                    totalReviews={property.totalReviews}
+                />
             </div>
         </div>
     );

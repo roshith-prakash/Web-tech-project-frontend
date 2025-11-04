@@ -40,8 +40,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [dbUser, setDbUser] = useState<UserType | null>(null);
   const { currentUser } = useAuth();
 
-  console.log(dbUser);
-
   // Fetch current user information from database - UseQuery Method
   const { data, refetch: fetchUser } = useQuery({
     queryKey: ["dbUser", currentUser], // Use user ID for efficiency

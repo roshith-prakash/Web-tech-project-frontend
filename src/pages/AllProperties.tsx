@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link, useSearchParams } from "react-router-dom";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { Input } from "@/components/ui/input";
-import { PrimaryButton, CompactMapEmbed, FavoriteButton } from "@/components";
+import { PrimaryButton, CompactMapEmbed, FavoriteButton, StarRating } from "@/components";
 import dayjs from "dayjs";
 
 // Property type based on schema.prisma
@@ -20,6 +20,8 @@ interface Property {
   currency?: string;
   createdAt: string;
   updatedAt: string;
+  averageRating?: number;
+  totalReviews?: number;
   host: {
     id: string;
     name: string;
@@ -124,6 +126,18 @@ const PropertyCard = ({ property, showMap = false }: { property: Property; showM
             <p className="text-gray-600 text-sm mb-3 line-clamp-2">
               {property.description}
             </p>
+          )}
+
+          {/* Review Statistics */}
+          {property.totalReviews && property.totalReviews > 0 && (
+            <div className="mb-3">
+              <StarRating
+                rating={property.averageRating || 0}
+                size="sm"
+                showNumber={true}
+                totalReviews={property.totalReviews}
+              />
+            </div>
           )}
 
           {/* Host Info */}

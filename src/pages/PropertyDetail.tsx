@@ -2,7 +2,7 @@ import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useDBUser } from "@/context/UserContext";
 import { axiosInstance } from "@/utils/axiosInstance";
-import { PrimaryButton, SecondaryButton, GoogleMapEmbed, FavoriteButton } from "@/components";
+import { PrimaryButton, SecondaryButton, GoogleMapEmbed, FavoriteButton, ReviewSection } from "@/components";
 import dayjs from "dayjs";
 
 interface Property {
@@ -24,6 +24,18 @@ interface Property {
     email: string;
     photoURL: string;
   };
+  reviews?: Array<{
+    id: string;
+    rating: number;
+    comment: string;
+    createdAt: string;
+    user: {
+      name: string;
+      photoURL: string;
+    };
+  }>;
+  averageRating?: number;
+  totalReviews?: number;
 }
 
 const fetchProperty = async (id: string): Promise<Property> => {
@@ -290,6 +302,16 @@ const PropertyDetail = () => {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Reviews Section */}
+      <div className="mt-12">
+        <ReviewSection
+          propertyId={property.id}
+          initialReviews={property.reviews || []}
+          averageRating={property.averageRating}
+          totalReviews={property.totalReviews}
+        />
       </div>
     </div>
   );
