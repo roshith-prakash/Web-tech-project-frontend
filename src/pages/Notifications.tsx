@@ -11,6 +11,17 @@ import relativeTime from "dayjs/plugin/relativeTime";
 
 dayjs.extend(relativeTime);
 
+// Function to format dates in notification messages from YYYY-MM-DD to DD/MM/YYYY
+const formatNotificationMessage = (message: string): string => {
+    // Regex to match YYYY-MM-DD format dates
+    const dateRegex = /(\d{4})-(\d{2})-(\d{2})/g;
+
+    return message.replace(dateRegex, (match, year, month, day) => {
+        // Convert YYYY-MM-DD to DD/MM/YYYY
+        return `${day}/${month}/${year}`;
+    });
+};
+
 interface Notification {
     id: string;
     message: string;
@@ -320,12 +331,12 @@ const NotificationCard = ({
                     <div className="flex items-start justify-between gap-4">
                         <div className="flex-1">
                             <p className={`text-sm leading-relaxed ${!notification.read ? 'font-medium text-gray-900' : 'text-gray-700'}`}>
-                                {notification.message}
+                                {formatNotificationMessage(notification.message)}
                             </p>
 
                             <div className="flex items-center gap-4 mt-2">
                                 <span className="text-xs text-gray-500">
-                                    {dayjs(notification.createdAt).fromNow()}
+                                    {dayjs(notification.createdAt).format('DD/MM/YYYY')} • {dayjs(notification.createdAt).fromNow()}
                                 </span>
                                 <span className={`text-xs px-2 py-1 rounded-full ${notification.type.toLowerCase() === 'booking' ? 'bg-blue-100 text-blue-800' :
                                     notification.type.toLowerCase() === 'confirmed' ? 'bg-green-100 text-green-800' :

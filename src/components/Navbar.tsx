@@ -1,9 +1,7 @@
 import { useState } from "react";
 import { RxCross2, RxHamburgerMenu } from "react-icons/rx";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { IoMoon } from "react-icons/io5";
-import { IoSunnySharp } from "react-icons/io5";
-import { type ContextValue, useDarkMode } from "@/context/DarkModeContext";
+
 import { useDBUser } from "@/context/UserContext";
 import { auth } from "@/firebase/firebase";
 import { signOut } from "firebase/auth";
@@ -22,7 +20,6 @@ import NotificationBell from "./NotificationBell";
 import logo from "@/assets/logo.png";
 
 const Navbar = () => {
-  const { isDarkMode, toggleDarkMode } = useDarkMode() as ContextValue;
   const { dbUser } = useDBUser();
   const { currentUser } = useAuth();
   const [open, setOpen] = useState(false);
@@ -183,18 +180,7 @@ const Navbar = () => {
             <NotificationBell />
           </div>
 
-          {/* Theme change button */}
-          <button
-            aria-label="Change Theme"
-            className="hidden cursor-pointer lg:flex"
-            onClick={toggleDarkMode}
-          >
-            {isDarkMode ? (
-              <IoSunnySharp className="hover:text-darkmodeCTA text-2xl transition-all" />
-            ) : (
-              <IoMoon className="hover:text-cta text-2xl transition-all" />
-            )}
-          </button>
+
           <div className="hidden lg:block">
             <Popover>
               <PopoverTrigger className="flex items-center cursor-pointer">
@@ -321,18 +307,7 @@ const Navbar = () => {
           {/* Notification Bell */}
           <NotificationBell />
 
-          {/* Toggle Light & Dark Mode */}
-          <button
-            className="cursor-pointer"
-            aria-label="Change Theme"
-            onClick={toggleDarkMode}
-          >
-            {isDarkMode ? (
-              <IoSunnySharp className="hover:text-cta text-xl transition-all" />
-            ) : (
-              <IoMoon className="hover:text-cta text-xl transition-all" />
-            )}
-          </button>
+
 
           {/* Pop over component */}
           <Popover>
