@@ -60,6 +60,8 @@ const PropertyDetail = () => {
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
+  const isPropertyOwner = dbUser?.id === property?.host?.id;
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -231,7 +233,19 @@ const PropertyDetail = () => {
 
             {/* Booking Actions */}
             <div className="space-y-3">
-              {isGuest ? (
+              {isPropertyOwner ? (
+                <>
+                  <Link to={`/property/${property.id}/edit`} className="block">
+                    <PrimaryButton
+                      text="Edit Property"
+                      className="w-full py-3 text-lg"
+                    />
+                  </Link>
+                  <p className="text-xs text-gray-500 text-center">
+                    Manage your property details and availability
+                  </p>
+                </>
+              ) : isGuest ? (
                 <>
                   <Link to={`/property/${property.id}/book`} className="block">
                     <PrimaryButton
@@ -259,13 +273,15 @@ const PropertyDetail = () => {
                 </div>
               )}
 
-              <SecondaryButton
-                text="Contact Host"
-                className="w-full py-3"
-                onClick={() => {
-                  window.location.href = `mailto:${property.host?.email}?subject=Inquiry about ${property.title}`;
-                }}
-              />
+              {!isPropertyOwner && (
+                <SecondaryButton
+                  text="Contact Host"
+                  className="w-full py-3"
+                  onClick={() => {
+                    window.location.href = `mailto:${property.host?.email}?subject=Inquiry about ${property.title}`;
+                  }}
+                />
+              )}
             </div>
 
             {/* Property Stats */}

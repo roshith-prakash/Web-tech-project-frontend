@@ -5,8 +5,10 @@ import { useQuery } from "@tanstack/react-query";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { useDBUser } from "@/context/UserContext";
 import { PrimaryButton, SecondaryButton, GoogleMapEmbed } from "@/components";
+import DatePicker from "@/components/DatePicker";
 import { toast } from "react-hot-toast";
-import { BsTrash, BsPlus } from "react-icons/bs";
+import { BsTrash, BsPlus, BsCalendar } from "react-icons/bs";
+import dayjs from "dayjs";
 
 interface Property {
     id: string;
@@ -20,7 +22,12 @@ interface Property {
     currency?: string;
     createdAt: string;
     updatedAt: string;
-    blockedDates: any[];
+    blockedDates: { startDate: string; endDate: string }[];
+    bookings?: {
+        startDate: string;
+        endDate: string;
+        status: string;
+    }[];
     host: {
         id: string;
         name: string;
@@ -51,6 +58,10 @@ const EditProperty = () => {
     const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [imageToRemove, setImageToRemove] = useState<string | null>(null);
+    const [blockedDates, setBlockedDates] = useState<{ startDate: string; endDate: string }[]>([]);
+    const [allUnavailableDates, setAllUnavailableDates] = useState<{ startDate: string; endDate: string }[]>([]);
+    const [newBlockedStart, setNewBlockedStart] = useState("");
+    const [newBlockedEnd, setNewBlockedEnd] = useState("");
 
     const {
         data: property,
@@ -77,6 +88,15 @@ const EditProperty = () => {
                 longitude: property.longitude?.toString() || "",
                 currency: property.currency || "USD",
             });
+            setBlockedDates(property.blockedDates || []);
+
+            // Combine bookings and blocked dates for calendar display
+            const bookingDates = (property.bookings || []).map(b => ({
+                startDate: b.startDate,
+                endDate: b.endDate,
+            }));
+            const manuallyBlocked = property.blockedDates || [];
+            setAllUnavailableDates([...bookingDates, ...manuallyBlocked]);
         }
     }, [property]);
 
@@ -99,6 +119,54 @@ const EditProperty = () => {
         setSelectedFiles(e.target.files);
     };
 
+    const handleAddBlockedDate = () => {
+        if (!newBlockedStart || !newBlockedEnd) {
+            toast.error("Please select both start and end dates");
+            return;
+        }
+
+        if (new Date(newBlockedStart) > new Date(newBlockedEnd)) {
+            toast.error("End date must be after start date");
+            return;
+        }
+
+        // Check for overlapping dates with ALL unavailable dates (bookings + blocked)
+        const hasOverlap = allUnavailableDates.some((blocked) => {
+            const existingStart = new Date(blocked.startDate);
+            const existingEnd = new Date(blocked.endDate);
+            const newStart = new Date(newBlockedStart);
+            const newEnd = new Date(newBlockedEnd);
+
+            return (
+                (newStart >= existingStart && newStart <= existingEnd) ||
+                (newEnd >= existingStart && newEnd <= existingEnd) ||
+                (newStart <= existingStart && newEnd >= existingEnd)
+            );
+        });
+
+        if (hasOverlap) {
+            toast.error("This date range overlaps with existing bookings or blocked dates");
+            return;
+        }
+
+        const newBlockedDate = { startDate: newBlockedStart, endDate: newBlockedEnd };
+        setBlockedDates([...blockedDates, newBlockedDate]);
+        setAllUnavailableDates([...allUnavailableDates, newBlockedDate]);
+        setNewBlockedStart("");
+        setNewBlockedEnd("");
+        toast.success("Blocked date added");
+    };
+
+    const handleRemoveBlockedDate = (index: number) => {
+        const removedDate = blockedDates[index];
+        setBlockedDates(blockedDates.filter((_, i) => i !== index));
+        // Also remove from allUnavailableDates
+        setAllUnavailableDates(allUnavailableDates.filter(
+            date => !(date.startDate === removedDate.startDate && date.endDate === removedDate.endDate)
+        ));
+        toast.success("Blocked date removed");
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
@@ -111,6 +179,9 @@ const EditProperty = () => {
             Object.entries(formData).forEach(([key, value]) => {
                 formDataToSend.append(key, value);
             });
+
+            // Add blocked dates as JSON string
+            formDataToSend.append("blockedDates", JSON.stringify(blockedDates));
 
             if (selectedFiles) {
                 Array.from(selectedFiles).forEach((file) => {
@@ -317,6 +388,101 @@ const EditProperty = () => {
                             <p className="text-sm text-gray-500 mt-1">
                                 Select multiple images to add to your property
                             </p>
+                        </div>
+
+                        {/* Blocked Dates Section */}
+                        <div className="border-t pt-6">
+                            <div className="flex items-center gap-2 mb-3">
+                                <BsCalendar className="text-blue-600 text-lg" />
+                                <label className="block text-sm font-medium text-gray-700">
+                                    Blocked Dates (Optional)
+                                </label>
+                            </div>
+                            <p className="text-sm text-gray-600 mb-4">
+                                Block dates when your property is unavailable for booking
+                            </p>
+
+                            {/* Add Blocked Date Form */}
+                            <div className="space-y-3 mb-4">
+                                <div className="grid grid-cols-2 gap-3">
+                                    <DatePicker
+                                        value={newBlockedStart}
+                                        onChange={setNewBlockedStart}
+                                        minDate={new Date().toISOString().split('T')[0]}
+                                        blockedDates={allUnavailableDates}
+                                        label="Start Date"
+                                        placeholder="Select start date"
+                                    />
+                                    <DatePicker
+                                        value={newBlockedEnd}
+                                        onChange={setNewBlockedEnd}
+                                        minDate={newBlockedStart || new Date().toISOString().split('T')[0]}
+                                        blockedDates={allUnavailableDates}
+                                        label="End Date"
+                                        placeholder="Select end date"
+                                    />
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={handleAddBlockedDate}
+                                    className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors text-sm border border-gray-300"
+                                >
+                                    <BsPlus className="text-lg" />
+                                    Add Blocked Date Range
+                                </button>
+                            </div>
+
+                            {/* Existing Bookings (Read-only) */}
+                            {property?.bookings && property.bookings.length > 0 && (
+                                <div className="mb-4">
+                                    <p className="text-xs font-medium text-gray-700 mb-2">Existing Bookings (Cannot be removed)</p>
+                                    <div className="space-y-2">
+                                        {property.bookings.map((booking, index) => (
+                                            <div
+                                                key={index}
+                                                className="flex items-center justify-between p-2 bg-blue-50 rounded-md border border-blue-200"
+                                            >
+                                                <div className="flex items-center gap-2">
+                                                    <BsCalendar className="text-blue-500 text-xs" />
+                                                    <span className="text-xs text-gray-700">
+                                                        {dayjs(booking.startDate).format('MMM DD, YYYY')} - {dayjs(booking.endDate).format('MMM DD, YYYY')}
+                                                    </span>
+                                                    <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded">
+                                                        {booking.status}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Manually Blocked Dates List */}
+                            {blockedDates.length > 0 && (
+                                <div className="space-y-2">
+                                    <p className="text-xs font-medium text-gray-700 mb-2">Manually Blocked Dates</p>
+                                    {blockedDates.map((blocked, index) => (
+                                        <div
+                                            key={index}
+                                            className="flex items-center justify-between p-2 bg-gray-50 rounded-md border border-gray-200"
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                <BsCalendar className="text-gray-500 text-xs" />
+                                                <span className="text-xs text-gray-700">
+                                                    {dayjs(blocked.startDate).format('MMM DD, YYYY')} - {dayjs(blocked.endDate).format('MMM DD, YYYY')}
+                                                </span>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleRemoveBlockedDate(index)}
+                                                className="text-red-600 hover:text-red-800 transition-colors"
+                                            >
+                                                <BsTrash className="text-xs" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
 
                         <div className="flex gap-3 pt-4">
