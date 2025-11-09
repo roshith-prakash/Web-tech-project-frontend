@@ -8,6 +8,7 @@ import AuthAction from "./AuthAction";
 import AllProperties from "./AllProperties";
 import PropertyDetail from "./PropertyDetail";
 import PayForBooking from "./PayForBooking";
+import MyRefunds from "./MyRefunds";
 
 export {
   Landing,
@@ -20,4 +21,5 @@ export {
   AllProperties,
   PropertyDetail,
   PayForBooking,
+  MyRefunds,
 };

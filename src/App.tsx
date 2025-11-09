@@ -10,6 +10,7 @@ import {
   AllProperties,
   PropertyDetail,
   PayForBooking,
+  MyRefunds,
 } from "./pages";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Profile from "./pages/Profile";
@@ -52,6 +53,7 @@ function App() {
             <Route path="/booking/:bookingId/pay" element={<PayForBooking />} />
 
             <Route path="/contact-support" element={<ContactSupport />} />
+            <Route path="/my-refunds" element={<MyRefunds />} />
             <Route path="/help" element={<Help />} />
             <Route path="/admin/support-tickets" element={<SupportTickets />} />
             <Route path="/notifications" element={<Notifications />} />

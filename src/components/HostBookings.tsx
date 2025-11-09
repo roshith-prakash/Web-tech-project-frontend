@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { useDBUser } from "@/context/UserContext";
 import { PrimaryButton, SecondaryButton } from "@/components";
-import { BsEye, BsCalendar, BsCreditCard, BsPersonFill, BsX, BsExclamationTriangle } from "react-icons/bs";
+import { BsEye, BsCalendar, BsCreditCard, BsPersonFill, BsX, BsExclamationTriangle, BsCheck, BsCheckCircle } from "react-icons/bs";
 import { toast } from "react-hot-toast";
 import dayjs from "dayjs";
 
@@ -17,6 +17,10 @@ interface Booking {
     user: {
         name: string;
         email: string;
+    };
+    payment?: {
+        status: string;
+        transactionDate: string;
     };
 }
 
@@ -83,6 +87,31 @@ const cancelHostBooking = async (bookingId: string, hostId: string) => {
 
         throw error;
     }
+};
+
+const acceptBooking = async (bookingId: string, hostId: string) => {
+    const response = await axiosInstance.post("/host/accept-booking", {
+        bookingId,
+        hostId
+    });
+    return response.data;
+};
+
+const rejectBooking = async (bookingId: string, hostId: string, reason?: string) => {
+    const response = await axiosInstance.post("/host/reject-booking", {
+        bookingId,
+        hostId,
+        reason
+    });
+    return response.data;
+};
+
+const completeBooking = async (bookingId: string, hostId: string) => {
+    const response = await axiosInstance.post("/host/complete-booking", {
+        bookingId,
+        hostId
+    });
+    return response.data;
 };
 
 // Cancel Booking Modal Component
@@ -167,6 +196,107 @@ const CancelBookingModal = ({
                         >
                             <BsX className="w-4 h-4" />
                             {isLoading ? "Cancelling..." : "Cancel Booking"}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// Reject Booking Modal Component
+const RejectBookingModal = ({
+    isOpen,
+    onClose,
+    onConfirm,
+    booking,
+    isLoading,
+    reason,
+    setReason
+}: {
+    isOpen: boolean;
+    onClose: () => void;
+    onConfirm: () => void;
+    booking: any;
+    isLoading: boolean;
+    reason: string;
+    setReason: (reason: string) => void;
+}) => {
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 bg-gray-900/20 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+                <div className="p-6">
+                    {/* Header */}
+                    <div className="flex items-center mb-4">
+                        <div className="flex-shrink-0 w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center mr-3">
+                            <BsExclamationTriangle className="w-5 h-5 text-orange-600" />
+                        </div>
+                        <div>
+                            <h3 className="text-lg font-semibold text-gray-900">
+                                Reject Booking
+                            </h3>
+                        </div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="mb-6">
+                        <p className="text-gray-600 mb-4">
+                            Are you sure you want to reject this booking request for <strong>{booking.property.title}</strong>?
+                        </p>
+
+                        <div className="bg-gray-50 rounded-lg p-4 space-y-2 text-sm mb-4">
+                            <div className="flex justify-between">
+                                <span className="text-gray-600">Guest:</span>
+                                <span className="font-medium">{booking.user.name}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-gray-600">Check-in:</span>
+                                <span className="font-medium">
+                                    {dayjs(booking.startDate).format('DD/MM/YYYY')}
+                                </span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-gray-600">Check-out:</span>
+                                <span className="font-medium">
+                                    {dayjs(booking.endDate).format('DD/MM/YYYY')}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Reason for rejection (optional)
+                            </label>
+                            <textarea
+                                value={reason}
+                                onChange={(e) => setReason(e.target.value)}
+                                placeholder="Let the guest know why you're rejecting this booking..."
+                                rows={3}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                            />
+                        </div>
+
+                        <p className="text-orange-600 text-sm font-medium">
+                            ⚠️ The guest will be notified of this rejection.
+                        </p>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex gap-3 justify-end">
+                        <SecondaryButton
+                            text="Cancel"
+                            onClick={onClose}
+                            disabled={isLoading}
+                        />
+                        <button
+                            onClick={onConfirm}
+                            disabled={isLoading}
+                            className="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                        >
+                            <BsX className="w-4 h-4" />
+                            {isLoading ? "Rejecting..." : "Reject Booking"}
                         </button>
                     </div>
                 </div>
@@ -344,15 +474,29 @@ const BookingCard = ({
     onCancelSuccess: () => void;
 }) => {
     const { dbUser } = useDBUser();
+    const queryClient = useQueryClient();
     const [isCancelling, setIsCancelling] = useState(false);
+    const [isAccepting, setIsAccepting] = useState(false);
+    const [isRejecting, setIsRejecting] = useState(false);
+    const [isCompleting, setIsCompleting] = useState(false);
     const [showCancelModal, setShowCancelModal] = useState(false);
+    const [showRejectModal, setShowRejectModal] = useState(false);
+    const [rejectReason, setRejectReason] = useState("");
     const nights = calculateNights(booking.startDate, booking.endDate);
 
-    // Check if booking can be cancelled
+    // Check booking status and dates
     const today = dayjs();
     const startDate = dayjs(booking.startDate);
+    const endDate = dayjs(booking.endDate);
     const isUpcoming = startDate.isAfter(today, 'day');
+    const isPast = endDate.isBefore(today, 'day');
+    const isActive = (startDate.isBefore(today, 'day') || startDate.isSame(today, 'day')) &&
+        (endDate.isAfter(today, 'day') || endDate.isSame(today, 'day'));
+
     const canCancel = isUpcoming && (booking.status === 'CONFIRMED' || booking.status === 'PENDING');
+    const canAccept = booking.status === 'PENDING' && isUpcoming && booking.payment?.status === 'SUCCESS';
+    const canReject = booking.status === 'PENDING' && isUpcoming;
+    const canComplete = booking.status === 'CONFIRMED' && (isPast || isActive);
 
     const handleCancelBooking = async () => {
         if (!dbUser?.id) {
@@ -375,6 +519,71 @@ const BookingCard = ({
             onCancelSuccess();
         } finally {
             setIsCancelling(false);
+        }
+    };
+
+    const handleAcceptBooking = async () => {
+        if (!dbUser?.id) {
+            toast.error("User not authenticated");
+            return;
+        }
+
+        setIsAccepting(true);
+
+        try {
+            await acceptBooking(booking.id, dbUser.id);
+            toast.success("Booking accepted successfully!");
+            queryClient.invalidateQueries({ queryKey: ["hostBookings", dbUser?.id] });
+            onCancelSuccess();
+        } catch (error: any) {
+            console.error("Accept booking error:", error);
+            toast.error(error.response?.data?.error || "Failed to accept booking");
+        } finally {
+            setIsAccepting(false);
+        }
+    };
+
+    const handleRejectBooking = async () => {
+        if (!dbUser?.id) {
+            toast.error("User not authenticated");
+            return;
+        }
+
+        setIsRejecting(true);
+
+        try {
+            await rejectBooking(booking.id, dbUser.id, rejectReason);
+            toast.success("Booking rejected");
+            setShowRejectModal(false);
+            setRejectReason("");
+            queryClient.invalidateQueries({ queryKey: ["hostBookings", dbUser?.id] });
+            onCancelSuccess();
+        } catch (error: any) {
+            console.error("Reject booking error:", error);
+            toast.error(error.response?.data?.error || "Failed to reject booking");
+        } finally {
+            setIsRejecting(false);
+        }
+    };
+
+    const handleCompleteBooking = async () => {
+        if (!dbUser?.id) {
+            toast.error("User not authenticated");
+            return;
+        }
+
+        setIsCompleting(true);
+
+        try {
+            await completeBooking(booking.id, dbUser.id);
+            toast.success("Booking marked as completed!");
+            queryClient.invalidateQueries({ queryKey: ["hostBookings", dbUser?.id] });
+            onCancelSuccess();
+        } catch (error: any) {
+            console.error("Complete booking error:", error);
+            toast.error(error.response?.data?.error || "Failed to complete booking");
+        } finally {
+            setIsCompleting(false);
         }
     };
 
@@ -432,8 +641,18 @@ const BookingCard = ({
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-4 text-sm">
+                    <div className="flex items-center gap-4 text-sm flex-wrap">
                         {getStatusBadge(booking.status)}
+                        {booking.payment && (
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${booking.payment.status === 'SUCCESS'
+                                ? 'bg-green-100 text-green-800'
+                                : booking.payment.status === 'PENDING'
+                                    ? 'bg-yellow-100 text-yellow-800'
+                                    : 'bg-red-100 text-red-800'
+                                }`}>
+                                Payment: {booking.payment.status}
+                            </span>
+                        )}
                     </div>
 
                     <div className="text-sm text-gray-600">
@@ -479,6 +698,49 @@ const BookingCard = ({
                             Contact Guest
                         </button>
 
+                        {/* Payment Pending Message */}
+                        {booking.status === 'PENDING' && booking.payment?.status !== 'SUCCESS' && (
+                            <div className="w-full px-3 py-2 bg-yellow-50 border border-yellow-200 rounded-md text-sm text-yellow-800">
+                                ⏳ Waiting for guest to complete payment
+                            </div>
+                        )}
+
+                        {/* Accept Booking Button */}
+                        {canAccept && (
+                            <button
+                                onClick={handleAcceptBooking}
+                                disabled={isAccepting}
+                                className="w-full px-3 py-2 bg-green-50 text-green-700 border border-green-200 rounded-md hover:bg-green-100 hover:border-green-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 font-medium"
+                            >
+                                <BsCheck className="w-5 h-5" />
+                                {isAccepting ? "Accepting..." : "Accept Booking"}
+                            </button>
+                        )}
+
+                        {/* Reject Booking Button */}
+                        {canReject && (
+                            <button
+                                onClick={() => setShowRejectModal(true)}
+                                disabled={isRejecting}
+                                className="w-full px-3 py-2 bg-orange-50 text-orange-600 border border-orange-200 rounded-md hover:bg-orange-100 hover:border-orange-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                            >
+                                <BsX className="w-4 h-4" />
+                                Reject Booking
+                            </button>
+                        )}
+
+                        {/* Complete Booking Button */}
+                        {canComplete && (
+                            <button
+                                onClick={handleCompleteBooking}
+                                disabled={isCompleting}
+                                className="w-full px-3 py-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-md hover:bg-blue-100 hover:border-blue-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 font-medium"
+                            >
+                                <BsCheckCircle className="w-4 h-4" />
+                                {isCompleting ? "Completing..." : "Mark as Completed"}
+                            </button>
+                        )}
+
                         {canCancel && (
                             <button
                                 onClick={() => setShowCancelModal(true)}
@@ -497,6 +759,20 @@ const BookingCard = ({
                             onConfirm={handleCancelBooking}
                             booking={booking}
                             isLoading={isCancelling}
+                        />
+
+                        {/* Reject Booking Modal */}
+                        <RejectBookingModal
+                            isOpen={showRejectModal}
+                            onClose={() => {
+                                setShowRejectModal(false);
+                                setRejectReason("");
+                            }}
+                            onConfirm={handleRejectBooking}
+                            booking={booking}
+                            isLoading={isRejecting}
+                            reason={rejectReason}
+                            setReason={setRejectReason}
                         />
                     </div>
                 </div>

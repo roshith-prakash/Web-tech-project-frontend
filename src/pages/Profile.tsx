@@ -242,6 +242,21 @@ const Profile = () => {
 
           {tabValue === "bookings" && (
             <>
+              {/* Refunds Link for Guests */}
+              {dbUser?.role === "GUEST" && (
+                <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-semibold text-blue-900 mb-1">Need a Refund?</h3>
+                      <p className="text-sm text-blue-700">View and track your refund requests for cancelled bookings</p>
+                    </div>
+                    <a href="/my-refunds" className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium">
+                      View Refunds
+                    </a>
+                  </div>
+                </div>
+              )}
+
               {dbUser?.role === "HOST" ? (
                 <HostBookings />
               ) : (
