@@ -11,6 +11,8 @@ interface Review {
     rating: number;
     comment: string;
     createdAt: string;
+    hostReply?: string;
+    hostRepliedAt?: string;
     user: {
         name: string;
         photoURL: string;
@@ -19,6 +21,7 @@ interface Review {
 
 interface ReviewSectionProps {
     propertyId: string;
+    propertyHostId?: string;
     initialReviews?: Review[];
     averageRating?: number;
     totalReviews?: number;
@@ -26,6 +29,7 @@ interface ReviewSectionProps {
 
 const ReviewSection = ({
     propertyId,
+    propertyHostId,
     initialReviews = [],
     averageRating = 0,
     totalReviews = 0
@@ -102,10 +106,7 @@ const ReviewSection = ({
         }
     };
 
-    const handleReviewAdded = async () => {
-        setShowReviewForm(false);
-        setCanReview(false);
-
+    const fetchReviews = async () => {
         // Reload reviews to get the latest data
         try {
             const response = await axiosInstance.post("/guest/get-property-reviews", {
@@ -124,6 +125,12 @@ const ReviewSection = ({
         } catch (error) {
             console.error("Error reloading reviews:", error);
         }
+    };
+
+    const handleReviewAdded = async () => {
+        setShowReviewForm(false);
+        setCanReview(false);
+        await fetchReviews();
     };
 
     const renderStars = (rating: number, size: "sm" | "md" = "md") => {
@@ -202,7 +209,12 @@ const ReviewSection = ({
             ) : (
                 <div className="space-y-4">
                     {reviews.map((review) => (
-                        <ReviewCard key={review.id} review={review} />
+                        <ReviewCard
+                            key={review.id}
+                            review={review}
+                            propertyHostId={propertyHostId}
+                            onReplyAdded={fetchReviews}
+                        />
                     ))}
 
                     {/* Load More Button */}

@@ -122,14 +122,13 @@ const PropertyCard = ({ property, showMap = false }: { property: Property; showM
             <span className="line-clamp-1">{property.location}</span>
           </p>
 
-          {property.description && (
-            <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-              {property.description}
-            </p>
-          )}
+          {/* Description - always 2 lines for consistent alignment */}
+          <p className="text-gray-600 text-sm mb-3 line-clamp-2 h-10">
+            {property.description || "\u00A0"}
+          </p>
 
           {/* Review Statistics */}
-          {property.totalReviews && property.totalReviews > 0 && (
+          {property.totalReviews && property.totalReviews > 0 ? (
             <div className="mb-3">
               <StarRating
                 rating={property.averageRating || 0}
@@ -137,6 +136,10 @@ const PropertyCard = ({ property, showMap = false }: { property: Property; showM
                 showNumber={true}
                 totalReviews={property.totalReviews}
               />
+            </div>
+          ) : (
+            <div className="mb-3 text-sm text-gray-500">
+              No reviews yet
             </div>
           )}
 

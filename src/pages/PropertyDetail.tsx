@@ -308,6 +308,7 @@ const PropertyDetail = () => {
       <div className="mt-12">
         <ReviewSection
           propertyId={property.id}
+          propertyHostId={property.host?.id}
           initialReviews={property.reviews || []}
           averageRating={property.averageRating}
           totalReviews={property.totalReviews}
