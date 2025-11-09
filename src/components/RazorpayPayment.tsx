@@ -89,7 +89,7 @@ const RazorpayPayment = ({
                         },
                         sequence: ["block.upi", "block.wallet"],
                         preferences: {
-                            show_default_blocks: false, // Hide other payment methods
+                            show_default_blocks: false,
                         },
                     },
                 },

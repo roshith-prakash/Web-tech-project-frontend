@@ -9,6 +9,7 @@ import {
   Signup,
   AllProperties,
   PropertyDetail,
+  PayForBooking,
 } from "./pages";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Profile from "./pages/Profile";
@@ -48,6 +49,7 @@ function App() {
             <Route path="/property/:id" element={<PropertyDetail />} />
             <Route path="/property/:id/edit" element={<EditProperty />} />
             <Route path="/property/:id/book" element={<BookProperty />} />
+            <Route path="/booking/:bookingId/pay" element={<PayForBooking />} />
 
             <Route path="/contact-support" element={<ContactSupport />} />
             <Route path="/help" element={<Help />} />

@@ -7,6 +7,7 @@ import ForgotPassword from "./ForgotPassword";
 import AuthAction from "./AuthAction";
 import AllProperties from "./AllProperties";
 import PropertyDetail from "./PropertyDetail";
+import PayForBooking from "./PayForBooking";
 
 export {
   Landing,
@@ -18,4 +19,5 @@ export {
   AuthAction,
   AllProperties,
   PropertyDetail,
+  PayForBooking,
 };

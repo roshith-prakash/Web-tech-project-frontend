@@ -688,6 +688,20 @@ const BookingCard = ({
                             />
                         </Link>
 
+                        {/* Pay Now button for pending bookings with pending/failed payment */}
+                        {booking.status === 'PENDING' &&
+                            isUpcoming &&
+                            (booking.payment?.status === 'PENDING' || booking.payment?.status === 'FAILED') && (
+                                <Link to={`/booking/${booking.id}/pay`} className="block">
+                                    <button
+                                        className="w-full px-3 py-2 bg-green-50 text-green-700 border border-green-200 rounded-md hover:bg-green-100 hover:border-green-300 transition-colors flex items-center justify-center gap-2 font-medium"
+                                    >
+                                        <BsCreditCard className="w-4 h-4" />
+                                        Pay Now
+                                    </button>
+                                </Link>
+                            )}
+
                         {canCancel && (
                             <button
                                 onClick={() => setShowCancelModal(true)}
