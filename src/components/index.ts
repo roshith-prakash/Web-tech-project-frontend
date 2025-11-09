@@ -18,6 +18,7 @@ import ReviewCard from "./ReviewCard";
 import ReviewForm from "./ReviewForm";
 import ReviewSection from "./ReviewSection";
 import StarRating from "./StarRating";
+import RazorpayPayment from "./RazorpayPayment";
 
 export {
   PrimaryButton,
@@ -40,4 +41,5 @@ export {
   ReviewForm,
   ReviewSection,
   StarRating,
+  RazorpayPayment,
 };
