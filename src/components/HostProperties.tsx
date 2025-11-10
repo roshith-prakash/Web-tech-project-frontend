@@ -68,16 +68,19 @@ const HostProperties = () => {
     const properties: Property[] = data?.properties || [];
 
     const handleDeleteProperty = async (propertyId: string) => {
+        console.log("🗑️ Attempting to delete property:", propertyId);
         try {
-            await axiosInstance.post("/host/delete-property", {
+            const response = await axiosInstance.post("/host/delete-property", {
                 propertyId,
                 userId: dbUser?.id,
             });
+            console.log("✅ Delete response:", response.data);
             toast.success("Property deleted successfully");
             refetch();
             setShowDeleteModal(false);
             setSelectedProperty(null);
         } catch (error: any) {
+            console.error("❌ Delete error:", error);
             toast.error(error.response?.data?.error || "Failed to delete property");
         }
     };
@@ -165,6 +168,7 @@ const HostProperties = () => {
                             key={property.id}
                             property={property}
                             onDelete={() => {
+                                console.log("🗑️ Delete button clicked for:", property.title);
                                 setSelectedProperty(property);
                                 setShowDeleteModal(true);
                             }}
@@ -177,7 +181,7 @@ const HostProperties = () => {
 
             {/* Delete Confirmation Modal */}
             {showDeleteModal && selectedProperty && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                <div className="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-50 p-4">
                     <div className="bg-white rounded-lg p-6 max-w-md w-full">
                         <h3 className="text-lg font-semibold text-gray-800 mb-4">
                             Delete Property

@@ -77,7 +77,7 @@ const currencySymbols: Record<string, string> = {
  */
 export const formatCurrency = (
     amount: number,
-    currency: string = "USD"
+    currency: string = "INR"
 ): string => {
     const symbol = currencySymbols[currency.toUpperCase()] || currency;
     const formattedAmount = amount.toLocaleString("en-US", {
@@ -95,7 +95,7 @@ export const formatCurrency = (
  */
 export const formatPricePerNight = (
     price: number,
-    currency: string = "USD"
+    currency: string = "INR"
 ): string => {
     return `${formatCurrency(price, currency)}/night`;
 };

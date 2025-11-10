@@ -53,7 +53,7 @@ const EditProperty = () => {
         pricePerNight: "",
         latitude: "",
         longitude: "",
-        currency: "USD",
+        currency: "INR",
     });
     const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -86,7 +86,7 @@ const EditProperty = () => {
                 pricePerNight: property.pricePerNight.toString(),
                 latitude: property.latitude?.toString() || "",
                 longitude: property.longitude?.toString() || "",
-                currency: property.currency || "USD",
+                currency: property.currency || "INR",
             });
             setBlockedDates(property.blockedDates || []);
 
@@ -398,17 +398,12 @@ const EditProperty = () => {
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
                                     Currency
                                 </label>
-                                <select
-                                    name="currency"
-                                    value={formData.currency}
-                                    onChange={handleInputChange}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                >
-                                    <option value="USD">USD</option>
-                                    <option value="EUR">EUR</option>
-                                    <option value="GBP">GBP</option>
-                                    <option value="INR">INR</option>
-                                </select>
+                                <input
+                                    type="text"
+                                    value="INR"
+                                    disabled
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-600 cursor-not-allowed"
+                                />
                             </div>
                         </div>
 

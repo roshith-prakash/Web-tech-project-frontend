@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { useDBUser } from "@/context/UserContext";
 import { axiosInstance } from "@/utils/axiosInstance";
 import { PrimaryButton, SecondaryButton, GoogleMapEmbed } from "@/components";
@@ -9,6 +10,7 @@ import { BsTrash, BsPlus } from "react-icons/bs";
 const AddProperty = () => {
   const { dbUser } = useDBUser();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const isHost = dbUser?.role === "HOST";
 
   const [formData, setFormData] = useState({
@@ -18,7 +20,7 @@ const AddProperty = () => {
     pricePerNight: "",
     latitude: "",
     longitude: "",
-    currency: "USD",
+    currency: "INR",
   });
 
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
@@ -159,6 +161,10 @@ const AddProperty = () => {
         },
       });
 
+      // Invalidate cache to refresh property lists
+      queryClient.invalidateQueries({ queryKey: ["hostProperties"] });
+      queryClient.invalidateQueries({ queryKey: ["properties"] });
+
       toast.success("Property added successfully!");
       navigate("/profile");
     } catch (error: any) {
@@ -295,17 +301,12 @@ const AddProperty = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Currency
                 </label>
-                <select
-                  name="currency"
-                  value={formData.currency}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="USD">USD</option>
-                  <option value="EUR">EUR</option>
-                  <option value="GBP">GBP</option>
-                  <option value="INR">INR</option>
-                </select>
+                <input
+                  type="text"
+                  value="INR"
+                  disabled
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-600 cursor-not-allowed"
+                />
               </div>
             </div>
 
