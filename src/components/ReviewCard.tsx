@@ -52,6 +52,11 @@ const ReviewCard = ({ review, propertyHostId, onReplyAdded }: ReviewCardProps) =
             return;
         }
 
+        if (replyText.trim().length < 5) {
+            toast.error("Reply must be at least 5 characters long");
+            return;
+        }
+
         setIsSubmitting(true);
         try {
             if (hasReply && isEditing) {
@@ -59,7 +64,7 @@ const ReviewCard = ({ review, propertyHostId, onReplyAdded }: ReviewCardProps) =
                 await axiosInstance.post("/host/update-review-reply", {
                     reviewId: review.id,
                     hostId: dbUser?.id,
-                    hostReply: replyText,
+                    hostReply: replyText.trim(),
                 });
                 toast.success("Reply updated successfully");
             } else {
@@ -67,7 +72,7 @@ const ReviewCard = ({ review, propertyHostId, onReplyAdded }: ReviewCardProps) =
                 await axiosInstance.post("/host/reply-to-review", {
                     reviewId: review.id,
                     hostId: dbUser?.id,
-                    hostReply: replyText,
+                    hostReply: replyText.trim(),
                 });
                 toast.success("Reply added successfully");
             }
@@ -200,9 +205,18 @@ const ReviewCard = ({ review, propertyHostId, onReplyAdded }: ReviewCardProps) =
                                 value={replyText}
                                 onChange={(e) => setReplyText(e.target.value)}
                                 placeholder="Write your response..."
+                                maxLength={500}
                                 rows={3}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                             />
+                            <div className="flex justify-between items-center">
+                                <p className={`text-xs ${replyText.length >= 500 ? 'text-red-500 font-medium' : 'text-gray-500'}`}>
+                                    {replyText.length}/500 characters
+                                </p>
+                                {replyText.length >= 500 && (
+                                    <p className="text-xs text-red-500 font-medium">Maximum length reached</p>
+                                )}
+                            </div>
                             <div className="flex gap-2">
                                 <button
                                     onClick={handleSubmitReply}

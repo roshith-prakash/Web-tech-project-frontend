@@ -11,11 +11,11 @@ import {
   BsShield,
   BsGlobe,
   BsStar,
+  BsStarFill,
   BsPeople,
   BsAward,
   BsHeart,
   BsArrowRight,
-  BsCheckCircle,
 } from "react-icons/bs";
 
 const features = [
@@ -203,14 +203,17 @@ export default function Landing() {
                   </div>
                   <div className="flex-1">
                     <label className="block text-sm text-gray-600 mb-2 font-medium">Check-out</label>
-                    <input
-                      type="date"
-                      value={checkOutDate}
-                      onChange={(e) => setCheckOutDate(e.target.value)}
-                      min={checkInDate || new Date().toISOString().split('T')[0]}
-                      onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                      className="w-full pr-4 py-4 text-lg border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cta focus:border-transparent h-14"
-                    />
+                    <div className="relative">
+                      <BsCalendar className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg" />
+                      <input
+                        type="date"
+                        value={checkOutDate}
+                        onChange={(e) => setCheckOutDate(e.target.value)}
+                        min={checkInDate || new Date().toISOString().split('T')[0]}
+                        onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                        className="w-full pl-12 pr-4 py-4 text-lg border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cta focus:border-transparent h-14"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -407,7 +410,7 @@ export default function Landing() {
               <div key={index} className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow">
                 <div className="flex items-center gap-1 mb-6">
                   {[...Array(testimonial.rating)].map((_, i) => (
-                    <BsStar key={i} className="text-yellow-400 text-lg fill-current" />
+                    <BsStarFill key={i} className="text-yellow-400 text-lg" />
                   ))}
                 </div>
                 <p className="text-gray-700 mb-6 leading-relaxed">
@@ -445,8 +448,8 @@ export default function Landing() {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/properties">
-              <button className="px-8 py-4 bg-white text-cta font-semibold rounded-xl hover:bg-gray-50 transition-colors">
-                <div className="flex items-center gap-2">
+              <button className="w-full sm:w-auto px-8 py-4 bg-white text-cta font-semibold rounded-xl hover:bg-gray-50 transition-colors">
+                <div className="flex items-center justify-center gap-2">
                   <BsSearch />
                   Explore Properties
                 </div>
@@ -454,8 +457,8 @@ export default function Landing() {
             </Link>
             {!dbUser && (
               <Link to="/signup-host">
-                <button className="px-8 py-4 bg-transparent border-2 border-white text-white font-semibold rounded-xl hover:bg-white hover:text-cta transition-colors">
-                  <div className="flex items-center gap-2">
+                <button className="w-full sm:w-auto px-8 py-4 bg-transparent border-2 border-white text-white font-semibold rounded-xl hover:bg-white hover:text-cta transition-colors">
+                  <div className="flex items-center justify-center gap-2">
                     <BsHouse />
                     Become a Host
                   </div>

@@ -10,7 +10,7 @@ import { PacmanLoader } from "react-spinners";
 
 interface ProtectorProps {
   children: ReactNode;
-  requiredRole: "GUEST" | "HOST";
+  requiredRole?: "GUEST" | "HOST" | "ADMIN";
 }
 
 const Protector = ({ children, requiredRole }: ProtectorProps) => {
@@ -169,13 +169,14 @@ const Protector = ({ children, requiredRole }: ProtectorProps) => {
     );
   }
 
-  // If user exists in database but role does not match
-  if (dbUser && dbUser.role !== requiredRole) {
-    toast.error(
-      `That Page is reserved for ${
-        requiredRole === "GUEST" ? "Guests" : "Hosts"
-      }`
-    );
+  // If requiredRole is specified, check if user's role matches
+  if (requiredRole && dbUser && dbUser.role !== requiredRole) {
+    const roleNames = {
+      GUEST: "Guests",
+      HOST: "Hosts",
+      ADMIN: "Administrators",
+    };
+    toast.error(`That page is reserved for ${roleNames[requiredRole]}`);
     return (
       <div className="dark:bg-darkbg dark:text-darkmodetext h-screen">
         <Toaster />
@@ -186,8 +187,7 @@ const Protector = ({ children, requiredRole }: ProtectorProps) => {
               Access Denied
             </p>
             <p className="text-xl lg:text-xl px-5 text-center mt-3">
-              That page is reserved for{" "}
-              {requiredRole === "GUEST" ? "Guests" : "Hosts"}.
+              That page is reserved for {roleNames[requiredRole]}.
             </p>
             <div className="mt-10 flex flex-col gap-10 justify-center items-center">
               {/* Image */}
@@ -211,8 +211,8 @@ const Protector = ({ children, requiredRole }: ProtectorProps) => {
     );
   }
 
-  // If user exists in database and role matches
-  if (dbUser && dbUser.role === requiredRole) {
+  // If user exists in database and either no role is required or role matches
+  if (dbUser) {
     return <>{!loading && children}</>;
   }
 };

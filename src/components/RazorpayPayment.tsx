@@ -169,17 +169,8 @@ const RazorpayPayment = ({
                 className="w-full py-3 text-lg"
             />
 
-            <div className="text-xs text-gray-500 text-center space-y-2">
+            <div className="text-xs text-gray-500 text-center">
                 <p>🔒 Secure payment powered by Razorpay</p>
-                <p>Test Mode: Use these test payment methods</p>
-                <div className="bg-gray-50 p-3 rounded text-left">
-                    <p><strong>✅ UPI Test:</strong></p>
-                    <p>• UPI ID: success@razorpay</p>
-                    <p>• Or scan QR and approve in test mode</p>
-                    <p className="mt-2"><strong>✅ Wallet Test:</strong></p>
-                    <p>• Select any wallet (Paytm, PhonePe, etc.)</p>
-                    <p>• Payment will succeed automatically in test mode</p>
-                </div>
             </div>
         </div>
     );

@@ -169,6 +169,49 @@ const EditProperty = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // Validate required fields
+        if (!formData.title.trim()) {
+            toast.error("Property title is required");
+            return;
+        }
+
+        if (formData.title.trim().length < 3) {
+            toast.error("Property title must be at least 3 characters long");
+            return;
+        }
+
+        if (!formData.location.trim()) {
+            toast.error("Location is required");
+            return;
+        }
+
+        if (formData.location.trim().length < 3) {
+            toast.error("Location must be at least 3 characters long");
+            return;
+        }
+
+        if (!formData.pricePerNight || parseFloat(formData.pricePerNight) <= 0) {
+            toast.error("Price per night must be greater than 0");
+            return;
+        }
+
+        if (parseFloat(formData.pricePerNight) > 1000000) {
+            toast.error("Price per night seems unreasonably high. Please check the value.");
+            return;
+        }
+
+        // Validate coordinates if provided
+        if (formData.latitude && (parseFloat(formData.latitude) < -90 || parseFloat(formData.latitude) > 90)) {
+            toast.error("Latitude must be between -90 and 90");
+            return;
+        }
+
+        if (formData.longitude && (parseFloat(formData.longitude) < -180 || parseFloat(formData.longitude) > 180)) {
+            toast.error("Longitude must be between -180 and 180");
+            return;
+        }
+
         setIsSubmitting(true);
 
         try {
@@ -275,9 +318,18 @@ const EditProperty = () => {
                                 name="title"
                                 value={formData.title}
                                 onChange={handleInputChange}
+                                maxLength={150}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 required
                             />
+                            <div className="flex justify-between items-center mt-1">
+                                <p className={`text-xs ${formData.title.length >= 150 ? 'text-red-500 font-medium' : 'text-gray-500'}`}>
+                                    {formData.title.length}/150 characters
+                                </p>
+                                {formData.title.length >= 150 && (
+                                    <p className="text-xs text-red-500 font-medium">Maximum length reached</p>
+                                )}
+                            </div>
                         </div>
 
                         <div>
@@ -288,10 +340,19 @@ const EditProperty = () => {
                                 name="description"
                                 value={formData.description}
                                 onChange={handleInputChange}
+                                maxLength={2000}
                                 rows={4}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 placeholder="Describe your property..."
                             />
+                            <div className="flex justify-between items-center mt-1">
+                                <p className={`text-xs ${formData.description.length >= 2000 ? 'text-red-500 font-medium' : 'text-gray-500'}`}>
+                                    {formData.description.length}/2000 characters
+                                </p>
+                                {formData.description.length >= 2000 && (
+                                    <p className="text-xs text-red-500 font-medium">Maximum length reached</p>
+                                )}
+                            </div>
                         </div>
 
                         <div>
@@ -303,9 +364,18 @@ const EditProperty = () => {
                                 name="location"
                                 value={formData.location}
                                 onChange={handleInputChange}
+                                maxLength={200}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 required
                             />
+                            <div className="flex justify-between items-center mt-1">
+                                <p className={`text-xs ${formData.location.length >= 200 ? 'text-red-500 font-medium' : 'text-gray-500'}`}>
+                                    {formData.location.length}/200 characters
+                                </p>
+                                {formData.location.length >= 200 && (
+                                    <p className="text-xs text-red-500 font-medium">Maximum length reached</p>
+                                )}
+                            </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">

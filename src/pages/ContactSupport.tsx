@@ -13,11 +13,58 @@ const ContactSupport = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
+        // Validate required fields
+        if (!formData.name.trim()) {
+            alert("Please enter your name");
+            return;
+        }
+
+        if (formData.name.trim().length < 2) {
+            alert("Name must be at least 2 characters long");
+            return;
+        }
+
+        if (!formData.email.trim()) {
+            alert("Please enter your email address");
+            return;
+        }
+
+        // Basic email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(formData.email.trim())) {
+            alert("Please enter a valid email address");
+            return;
+        }
+
+        if (!formData.subject.trim()) {
+            alert("Please enter a subject");
+            return;
+        }
+
+        if (formData.subject.trim().length < 5) {
+            alert("Subject must be at least 5 characters long");
+            return;
+        }
+
+        if (!formData.message.trim()) {
+            alert("Please enter a message");
+            return;
+        }
+
+        if (formData.message.trim().length < 10) {
+            alert("Message must be at least 10 characters long");
+            return;
+        }
+
         try {
             // Create support ticket with timestamp and ID
             const supportTicket = {
                 id: Date.now().toString(),
                 ...formData,
+                name: formData.name.trim(),
+                email: formData.email.trim(),
+                subject: formData.subject.trim(),
+                message: formData.message.trim(),
                 timestamp: new Date().toISOString(),
                 status: 'open'
             };
@@ -138,9 +185,18 @@ const ContactSupport = () => {
                                     name="name"
                                     value={formData.name}
                                     onChange={handleChange}
+                                    maxLength={100}
                                     required
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 />
+                                <div className="flex justify-between items-center mt-1">
+                                    <p className={`text-xs ${formData.name.length >= 100 ? 'text-red-500 font-medium' : 'text-gray-500'}`}>
+                                        {formData.name.length}/100 characters
+                                    </p>
+                                    {formData.name.length >= 100 && (
+                                        <p className="text-xs text-red-500 font-medium">Maximum length reached</p>
+                                    )}
+                                </div>
                             </div>
 
                             <div>
@@ -186,9 +242,18 @@ const ContactSupport = () => {
                                     name="subject"
                                     value={formData.subject}
                                     onChange={handleChange}
+                                    maxLength={200}
                                     required
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 />
+                                <div className="flex justify-between items-center mt-1">
+                                    <p className={`text-xs ${formData.subject.length >= 200 ? 'text-red-500 font-medium' : 'text-gray-500'}`}>
+                                        {formData.subject.length}/200 characters
+                                    </p>
+                                    {formData.subject.length >= 200 && (
+                                        <p className="text-xs text-red-500 font-medium">Maximum length reached</p>
+                                    )}
+                                </div>
                             </div>
 
                             <div>
@@ -200,11 +265,20 @@ const ContactSupport = () => {
                                     name="message"
                                     value={formData.message}
                                     onChange={handleChange}
+                                    maxLength={2000}
                                     required
                                     rows={5}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                     placeholder="Please describe your issue or question in detail..."
                                 />
+                                <div className="flex justify-between items-center mt-1">
+                                    <p className={`text-xs ${formData.message.length >= 2000 ? 'text-red-500 font-medium' : 'text-gray-500'}`}>
+                                        {formData.message.length}/2000 characters
+                                    </p>
+                                    {formData.message.length >= 2000 && (
+                                        <p className="text-xs text-red-500 font-medium">Maximum length reached</p>
+                                    )}
+                                </div>
                             </div>
 
                             <button
