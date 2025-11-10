@@ -188,12 +188,11 @@ const Login = () => {
     <>
       <div className="lg:min-h-[89vh] flex w-full">
         {/* Image Div - displayed only on laptop */}
-        <div className="hidden lg:flex lg:flex-1 items-center justify-center">
+        <div className="hidden lg:flex lg:flex-1 items-center justify-center bg-gray-50">
           <img
-            src={
-              "https://res.cloudinary.com/do8rpl9l4/image/upload/v1741164523/racecar2_kznips.svg"
-            }
-            className="max-w-[70%]"
+            src={new URL("../assets/signin.jpg", import.meta.url).href}
+            alt="Sign in"
+            className="w-full h-full object-cover"
           />
         </div>
 

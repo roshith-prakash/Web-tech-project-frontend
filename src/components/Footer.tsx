@@ -1,6 +1,10 @@
 import { Link } from "react-router-dom";
+import { useDBUser } from "@/context/UserContext";
 
 const Footer = () => {
+  const { dbUser } = useDBUser();
+  const isSignedIn = !!dbUser;
+
   return (
     <footer className="bg-gray-50 border-t border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -26,18 +30,39 @@ const Footer = () => {
               >
                 Browse Properties
               </Link>
-              <Link
-                to="/profile"
-                className="block text-sm text-gray-600 hover:text-blue-600 transition-colors"
-              >
-                My Account
-              </Link>
-              <Link
-                to="/property-listing"
-                className="block text-sm text-gray-600 hover:text-blue-600 transition-colors"
-              >
-                List Your Property
-              </Link>
+              {isSignedIn ? (
+                <>
+                  <Link
+                    to="/profile"
+                    className="block text-sm text-gray-600 hover:text-blue-600 transition-colors"
+                  >
+                    My Account
+                  </Link>
+                  {dbUser.role === "HOST" && (
+                    <Link
+                      to="/property-listing"
+                      className="block text-sm text-gray-600 hover:text-blue-600 transition-colors"
+                    >
+                      List Your Property
+                    </Link>
+                  )}
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/login"
+                    className="block text-sm text-gray-600 hover:text-blue-600 transition-colors"
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    to="/signup"
+                    className="block text-sm text-gray-600 hover:text-blue-600 transition-colors"
+                  >
+                    Sign Up
+                  </Link>
+                </>
+              )}
             </div>
           </div>
 
@@ -45,17 +70,25 @@ const Footer = () => {
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-gray-900">Support</h3>
             <div className="space-y-2">
-              <Link
-                to="/contact-support"
-                className="block text-sm text-gray-600 hover:text-blue-600 transition-colors"
-              >
-                Contact Support
-              </Link>
+              {isSignedIn && (
+                <Link
+                  to="/contact-support"
+                  className="block text-sm text-gray-600 hover:text-blue-600 transition-colors"
+                >
+                  Contact Support
+                </Link>
+              )}
               <Link
                 to="/help"
                 className="block text-sm text-gray-600 hover:text-blue-600 transition-colors"
               >
                 Help Center
+              </Link>
+              <Link
+                to="/about"
+                className="block text-sm text-gray-600 hover:text-blue-600 transition-colors"
+              >
+                About Us
               </Link>
             </div>
           </div>

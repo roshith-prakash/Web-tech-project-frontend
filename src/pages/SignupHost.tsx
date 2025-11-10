@@ -375,12 +375,11 @@ const SignupHost = () => {
             </div>
           </div>
         </div>
-        <div className="hidden lg:flex lg:flex-1 items-center justify-center">
+        <div className="hidden lg:flex lg:flex-1 items-center justify-center bg-gray-50">
           <img
-            src={
-              "https://res.cloudinary.com/do8rpl9l4/image/upload/v1741164523/racecar_guyfno.svg"
-            }
-            className="max-w-[90%]"
+            src={new URL("../assets/signup.jpg", import.meta.url).href}
+            alt="Sign up as Host"
+            className="w-full h-full object-cover"
           />
         </div>
       </div>
